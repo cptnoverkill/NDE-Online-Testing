@@ -46,7 +46,7 @@
                     <form action="{{ url_for('revoke_test_access', user_id=user.id) }}" method="POST" style="display: flex; align-items: center;">
                         <select name="test_id" class="form-control" style="margin-right: 10px;">
                             {% for access in user.accesses %}
-                                <option value="{{ access.test.id }}">{{ access.test.title }}</option>
+                                <option value="{{ access.exam.id }}">{{ access.exam.title }}</option>
                             {% endfor %}
                         </select>
                         <button type="submit" class="btn btn-danger">Revoke Access</button>

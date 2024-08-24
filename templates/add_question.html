@@ -5,10 +5,10 @@
 
     <form method="POST">
         <div class="form-group">
-            <label for="test_id">Select Test:</label>
-            <select name="test_id" id="test_id" class="form-control" required>
+            <label for="exam._id">Select Test:</label>
+            <select name="exam._id" id="exam._id" class="form-control" required>
                 {% for test in tests %}
-                    <option value="{{ test.id }}">{{ test.title }}</option>
+                    <option value="{{ exam.id }}">{{ test.title }}</option>
                 {% endfor %}
             </select>
         </div>

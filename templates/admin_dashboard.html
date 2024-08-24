@@ -25,7 +25,7 @@
                 <li style="margin-bottom: 10px; border-bottom: 1px solid white; max-width: 600px; padding: 10px; min-height: 100px; display: flex; align-items: center;">
                     <div style="flex-grow: 1;">
                         <p><strong>User:</strong> {{ request.user.username }}</p>
-                        <p><strong>Test:</strong> {{ request.test.title }}</p>
+                        <p><strong>Test:</strong> {{ request.exam.title }}</p>
                         <p><strong>Requested on:</strong> {{ request.request_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 5px;">
@@ -50,7 +50,7 @@
             {% for test_result in completed_tests %}
                 <li style="margin-bottom: 20px; border: 1px solid #444; padding: 15px; border-radius: 5px;">
                     <div>
-                        <h3 style="margin-top: 0;">{{ test_result.test.title }}</h3>
+                        <h3 style="margin-top: 0;">{{ test_result.exam.title }}</h3>
                         <p><strong>User:</strong> {{ test_result.user.username }}</p>
                         <p><strong>Score:</strong> {{ "%.2f"|format(test_result.score) }}%</p>
                         <p><strong>Completed on:</strong> {{ test_result.date_submitted.strftime('%Y-%m-%d %H:%M:%S') }}</p>

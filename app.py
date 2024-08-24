@@ -117,21 +117,21 @@ def home():
 
             for access in test_accesses:
                 if access.is_accessible:
-                    accessible_tests.append(access.test)
+                    accessible_tests.append(access.exam)
                 else:
-                    inaccessible_tests.append(access.test)
+                    inaccessible_tests.append(access.exam)
 
             # Get tests the user has requested access to, but are pending approval
             pending_requests = TestAccessRequest.query.filter_by(user_id=current_user.id, status='pending').all()
-            pending_tests = [request.test for request in pending_requests]
+            pending_tests = [request.exam for request in pending_requests]
 
             # Get tests the user has not requested access to
-            all_accessible_exam_ids = [test.id for test in accessible_tests]
-            all_inaccessible_exam_ids = [test.id for test in inaccessible_tests]
-            all_pending_exam_ids = [test.id for test in pending_tests]
+            all_accessible_exam_ids = [exam.id for test in accessible_tests]
+            all_inaccessible_exam_ids = [exam.id for test in inaccessible_tests]
+            all_pending_exam_ids = [exam.id for test in pending_tests]
             all_exam_ids = all_accessible_exam_ids + all_inaccessible_exam_ids + all_pending_exam_ids
 
-            unavailable_tests = Test.query.filter(~Test.id.in_(all_exam_ids)).all()
+            unavailable_tests = Test.query.filter(~exam.id.in_(all_exam_ids)).all()
             inaccessible_tests.extend(unavailable_tests)
 
         # Ensure no duplicates
@@ -364,7 +364,7 @@ def approve_access(request_id):
     db.session.add(new_access)
     db.session.commit()
 
-    flash(f'Access request for test "{access_request.test.title}" by user "{access_request.user.username}" approved.', 'success')
+    flash(f'Access request for test "{access_request.exam.title}" by user "{access_request.user.username}" approved.', 'success')
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/deny_access/<int:request_id>', methods=['POST'], endpoint='admin_deny_access')
@@ -380,7 +380,7 @@ def deny_access(request_id):
     access_request.admin_comment = request.form.get('admin_comment', '')
     db.session.commit()
 
-    flash(f'Access request for test "{access_request.test.title}" by user "{access_request.user.username}" denied.', 'success')
+    flash(f'Access request for test "{access_request.exam.title}" by user "{access_request.user.username}" denied.', 'success')
     return redirect(url_for('admin_dashboard'))
 
 
@@ -397,12 +397,12 @@ def grant_test_access(user_id):
     test = Test.query.get_or_404(exam_id)
 
     # Check if the user already has access to the test
-    existing_access = TestAccess.query.filter_by(user_id=user.id, exam_id=test.id).first()
+    existing_access = TestAccess.query.filter_by(user_id=user.id, exam_id=exam.id).first()
     if existing_access:
         flash(f'User "{user.username}" already has access to the test "{test.title}".', 'info')
     else:
         # Grant access to the test
-        new_access = TestAccess(user_id=user.id, exam_id=test.id, is_accessible=True)
+        new_access = TestAccess(user_id=user.id, exam_id=exam.id, is_accessible=True)
         db.session.add(new_access)
         db.session.commit()
         flash(f'Access to test "{test.title}" has been granted to user "{user.username}".', 'success')
@@ -417,7 +417,7 @@ def manage_questions(exam_id):
         return redirect(url_for('home'))
 
     test = Test.query.get_or_404(exam_id)
-    questions = Question.query.filter_by(exam_id=test.id).all()
+    questions = Question.query.filter_by(exam_id=exam.id).all()
 
     if request.method == 'POST':
         question_type = request.form['question_type']
@@ -436,7 +436,7 @@ def manage_questions(exam_id):
                 option_c=option_c,
                 option_d=option_d,
                 correct_answer=correct_answer,
-                exam_id=test.id
+                exam_id=exam.id
             )
         elif question_type == 'true_false':
             question = Question(
@@ -444,16 +444,16 @@ def manage_questions(exam_id):
                 option_a='True',
                 option_b='False',
                 correct_answer='A' if correct_answer.lower() == 'true' else 'B',
-                exam_id=test.id
+                exam_id=exam.id
             )
         else:
             flash('Invalid question type.', 'error')
-            return redirect(url_for('manage_questions', exam_id=test.id))
+            return redirect(url_for('manage_questions', exam_id=exam.id))
 
         db.session.add(question)
         db.session.commit()
         flash(f'Question added to test "{test.title}".', 'success')
-        return redirect(url_for('manage_questions', exam_id=test.id))
+        return redirect(url_for('manage_questions', exam_id=exam.id))
 
     return render_template('manage_questions.html', test=test, questions=questions)
 
@@ -487,7 +487,7 @@ def user_dashboard():
 @login_required
 def exam_results(test_result_id):
     test_result = TestResult.query.get_or_404(test_result_id)
-    questions = test_result.test.questions
+    questions = test_result.exam.questions
     
     # Ensure the user has permission to view this result
     if not current_user.is_admin and test_result.user_id != current_user.id:
@@ -628,12 +628,12 @@ def revoke_test_access(user_id):
     exam_id = request.form['exam_id']
     
     # Eager load the test relationship using joinedload
-    access = TestAccess.query.options(joinedload(TestAccess.test)).filter_by(user_id=user.id, exam_id=exam_id).first()
+    access = TestAccess.query.options(joinedload(TestAccess.exam)).filter_by(user_id=user.id, exam_id=exam_id).first()
 
     if access:
         db.session.delete(access)
         db.session.commit()
-        flash(f'Access to test "{access.test.title}" has been revoked from user "{user.username}".', 'success')
+        flash(f'Access to test "{access.exam.title}" has been revoked from user "{user.username}".', 'success')
     else:
         flash(f'User "{user.username}" does not have access to the selected test.', 'error')
 
@@ -644,7 +644,7 @@ def revoke_test_access(user_id):
 @login_required
 def view_completed_test(test_result_id):
     test_result = TestResult.query.get_or_404(test_result_id)
-    questions = test_result.test.questions
+    questions = test_result.exam.questions
 
     # Ensure the user has permission to view this result
     if not current_user.is_admin and test_result.user_id != current_user.id:
@@ -663,10 +663,10 @@ def delete_completed_test(test_result_id):
         return redirect(url_for('home'))
 
     # Use joinedload to eagerly load the 'test' relationship
-    test_result = TestResult.query.options(joinedload(TestResult.test), joinedload(TestResult.user)).get_or_404(test_result_id)
+    test_result = TestResult.query.options(joinedload(TestResult.exam), joinedload(TestResult.user)).get_or_404(test_result_id)
 
     # Store information for the flash message before deleting
-    test_title = test_result.test.title if test_result.test else "Unknown Test"
+    test_title = test_result.exam.title if test_result.exam else "Unknown Test"
     username = test_result.user.username if test_result.user else "Unknown User"
 
     try:
@@ -728,7 +728,7 @@ def add_test_command(title):
     new_test = Test(title=title)
     db.session.add(new_test)
     db.session.commit()
-    click.echo(f'Test "{title}" added successfully with ID: {new_test.id}')
+    click.echo(f'Test "{title}" added successfully with ID: {new_exam.id}')
 
 
 @app.route('/admin/edit_test/<int:exam_id>', methods=['GET', 'POST'])
@@ -745,7 +745,7 @@ def edit_test(exam_id):
 
         # Check if a test with the new title already exists
         existing_test = Test.query.filter_by(title=title).first()
-        if existing_test and existing_test.id != exam_id:
+        if existing_test and existing_exam.id != exam_id:
             flash(f'A test with the title "{title}" already exists. Please choose a different title.', 'error')
             return redirect(url_for('edit_test', exam_id=exam_id))
 
@@ -789,7 +789,7 @@ def add_question():
                 option_c=option_c,
                 option_d=option_d,
                 correct_answer=correct_answer,
-                exam_id=test.id
+                exam_id=exam.id
             )
         elif question_type == 'true_false':
             question = Question(
@@ -797,7 +797,7 @@ def add_question():
                 option_a='True',
                 option_b='False',
                 correct_answer='A' if correct_answer.lower() == 'true' else 'B',
-                exam_id=test.id
+                exam_id=exam.id
             )
         else:
             flash('Invalid question type.', 'error')
@@ -865,7 +865,7 @@ def import_questions():
                     option_c=option_c,
                     option_d=option_d,
                     correct_answer=correct_answer,
-                    exam_id=test.id  # Ensure this is set
+                    exam_id=exam.id  # Ensure this is set
                 )
                 db.session.add(question)
             except Exception as e:
@@ -875,7 +875,7 @@ def import_questions():
 
         db.session.commit()
         flash('Questions imported successfully!', 'success')
-        return redirect(url_for('manage_questions', exam_id=test.id))
+        return redirect(url_for('manage_questions', exam_id=exam.id))
 
     return render_template('import_questions.html', tests=tests)
 
@@ -1019,7 +1019,7 @@ def export_test_result(test_result_id):
     user_answers = {}
 
     # Fetch answers directly from session or another reliable source
-    for question in test_result.test.questions:
+    for question in test_result.exam.questions:
         missed_question = MissedQuestion.query.filter_by(test_result_id=test_result.id, question_id=question.id).first()
 
         if missed_question:

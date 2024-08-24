@@ -5,12 +5,12 @@
     <h1>Your Tests</h1>
 
     <style>
-        .test-list {
+        .exam-list {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
         }
-        .test-card {
+        .exam-card {
             background-color: #f8f9fa;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -20,12 +20,12 @@
             flex-direction: column;
             justify-content: space-between;
         }
-        .test-card h3 {
+        .exam-card h3 {
             margin-top: 0;
             color: rgb(51, 51, 51);
             font-size: 20px;
         }
-        .test-card p {
+        .exam-card p {
             margin-bottom: 10px;
         }
         .btn {
@@ -77,9 +77,9 @@
             <h2>Previously Taken Tests</h2>
             {% for test_result in taken_tests %}
                 <div class="taken-test-item">
-                    <h3 style="color: black;">{{ test_result.test.title }}</h3>
+                    <h3 style="color: black;">{{ test_result.exam.title }}</h3>
                     <p><strong>Score:</strong> {{ "%.2f"|format(test_result.score) }}% </p>
-                    <p><strong>Total Questions:</strong> {{ test_result.test.questions|length }} </p>
+                    <p><strong>Total Questions:</strong> {{ test_result.exam.questions|length }} </p>
                     <p><strong>Date Taken:</strong> {{ format_pacific_time(test_result.date_submitted) }}</p>
                     
                 </div>

@@ -88,11 +88,11 @@
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
         </div>
 
-        <h1>{{ test_result.test.title }} Results</h1>
+        <h1>{{ test_result.exam.title }} Results</h1>
 
         <div class="score-info">
             <p><strong>Score:</strong> <span class="signature-line">{{ "%.2f"|format(test_result.score) }}%</span></p>
-            <p><strong>Total # of Questions:</strong> <span class="signature-line">{{ test_result.test.questions|length }}</span></p>
+            <p><strong>Total # of Questions:</strong> <span class="signature-line">{{ test_result.exam.questions|length }}</span></p>
         </div>
 
         <div class="signature-section">

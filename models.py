@@ -50,7 +50,7 @@ class Question(db.Model):
     option_c = db.Column(db.String(200), nullable=True)
     option_d = db.Column(db.String(200), nullable=True)
     correct_answer = db.Column(db.String(1), nullable=False)
-    exam_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
+    exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)
 
     exam = db.relationship('Test', back_populates='questions')
     missed_questions = db.relationship('MissedQuestion', back_populates='question', lazy=True)
@@ -80,7 +80,7 @@ class Question(db.Model):
 class ExamAccess(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    exam_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
+    exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)
     is_accessible = db.Column(db.Boolean, default=True)
     attempts = db.Column(db.Integer, default=0)
 
@@ -91,7 +91,7 @@ class ExamAccess(db.Model):
 class ExamResult(db.Model):
         id = Column(Integer, primary_key=True)
         user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-        exam_id = Column(Integer, ForeignKey('test.id', ondelete='CASCADE'), nullable=False)
+        exam_id = Column(Integer, ForeignKey('exam.id', ondelete='CASCADE'), nullable=False)
         score = Column(Float, nullable=False)
         date_submitted = Column(DateTime, default=datetime.utcnow)
 
@@ -108,7 +108,7 @@ class ExamResult(db.Model):
 class ExamAccessRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    exam_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
+    exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)
     status = db.Column(db.String(20), default='pending')  # 'pending', 'approved', 'denied'
     request_date = db.Column(db.DateTime, default=datetime.utcnow)
     response_date = db.Column(db.DateTime)

@@ -189,11 +189,11 @@
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
         </div>
 
-        <h1>{{ test_result.test.title }} Results</h1>
+        <h1>{{ test_result.exam.title }} Results</h1>
 
         <div class="score-info">
             <p><strong>Score:</strong> <span>{{ "%.2f"|format(test_result.score) }}%</span></p>
-            <p><strong>Total # of Questions:</strong> <span>{{ test_result.test.questions|length }}</span></p>
+            <p><strong>Total # of Questions:</strong> <span>{{ test_result.exam.questions|length }}</span></p>
         </div>
 
         <div class="signature-section">
@@ -267,7 +267,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for question in test_result.test.questions %}
+        {% for question in test_result.exam.questions %}
             {% if question.id not in test_result.missed_questions | map(attribute='question_id') %}
                 <tr>
                     <td>{{ question.content }}</td>

@@ -16,7 +16,7 @@
                 {% for request in requests %}
                     <tr>
                         <td>{{ request.user.username }}</td>
-                        <td>{{ request.test.title }}</td>
+                        <td>{{ request.exam.title }}</td>
                         <td>{{ request.request_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                         <td>
                             <a href="{{ url_for('approve_access', request_id=request.id) }}">Approve</a>

@@ -44,7 +44,7 @@
 
 <div class="report-header">
     <h1>Test Results</h1>
-    <h2>{{ test_result.test.title }}</h2>
+    <h2>{{ test_result.exam.title }}</h2>
 </div>
 
 <div class="report-section">
@@ -55,7 +55,7 @@
 
 <div class="report-section">
     <h3>Answer Summary</h3>
-    {% for question in test_result.test.questions %}
+    {% for question in test_result.exam.questions %}
         <p><strong>Question {{ loop.index }}:</strong> {{ question.content }}</p>
         <p><strong>Your Answer:</strong> {{ question.get_user_answer(test_result.user_id) }}</p>
         <p><strong>Correct Answer:</strong> {{ question.correct_answer }}</p>

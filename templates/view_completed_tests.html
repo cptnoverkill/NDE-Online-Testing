@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>Completed Test: {{ test_result.test.title }}</h1>
+    <h1>Completed Test: {{ test_result.exam.title }}</h1>
     <p><strong>User:</strong> {{ test_result.user.username }}</p>
-    <p><strong>Score:</strong> {{ test_result.score }} out of {{ test_result.test.questions|length }}</p>
+    <p><strong>Score:</strong> {{ test_result.score }} out of {{ test_result.exam.questions|length }}</p>
     <p><strong>Date Submitted:</strong> {{ test_result.date_submitted.strftime('%Y-%m-%d %H:%M:%S') }}</p>
 
     <h2>Questions</h2>

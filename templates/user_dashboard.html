@@ -8,7 +8,7 @@
         {% if exam_results %}
             {% for result in exam_results %}
             <li>
-                <strong>{{ result.test.title }}</strong>: You scored {{ result.score }} out of {{ result.test.questions|length }}.
+                <strong>{{ result.exam.title }}</strong>: You scored {{ result.score }} out of {{ result.exam.questions|length }}.
             </li>
             {% endfor %}
         {% else %}
@@ -21,7 +21,7 @@
         {% if requests %}
             {% for request in requests %}
             <li>
-                Test: <strong>{{ request.test.title }}</strong> - Status: {{ request.status }}
+                Test: <strong>{{ request.exam.title }}</strong> - Status: {{ request.status }}
             </li>
             {% endfor %}
         {% else %}
