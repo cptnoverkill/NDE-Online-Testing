@@ -126,12 +126,12 @@ def home():
             pending_tests = [request.test for request in pending_requests]
 
             # Get tests the user has not requested access to
-            all_accessible_test_ids = [test.id for test in accessible_tests]
-            all_inaccessible_test_ids = [test.id for test in inaccessible_tests]
-            all_pending_test_ids = [test.id for test in pending_tests]
-            all_test_ids = all_accessible_test_ids + all_inaccessible_test_ids + all_pending_test_ids
+            all_accessible_exam_ids = [test.id for test in accessible_tests]
+            all_inaccessible_exam_ids = [test.id for test in inaccessible_tests]
+            all_pending_exam_ids = [test.id for test in pending_tests]
+            all_exam_ids = all_accessible_exam_ids + all_inaccessible_exam_ids + all_pending_exam_ids
 
-            unavailable_tests = Test.query.filter(~Test.id.in_(all_test_ids)).all()
+            unavailable_tests = Test.query.filter(~Test.id.in_(all_exam_ids)).all()
             inaccessible_tests.extend(unavailable_tests)
 
         # Ensure no duplicates
@@ -246,10 +246,10 @@ def manage_test_session():
 
 
 
-@app.route('/submit_test/<int:test_id>', methods=['POST'])
+@app.route('/submit_test/<int:exam_id>', methods=['POST'])
 @login_required
-def submit_test(test_id):
-    test = Test.query.get_or_404(test_id)
+def submit_test(exam_id):
+    test = Test.query.get_or_404(exam_id)
     user_id = current_user.id
 
     total_questions = len(test.questions)
@@ -260,9 +260,9 @@ def submit_test(test_id):
 
     if 'answers' not in session:
         flash("There was an issue with your session data. Please try again.", "error")
-        return redirect(url_for('take_test', test_id=test_id))
+        return redirect(url_for('take_test', exam_id=exam_id))
 
-    test_result = TestResult(user_id=user_id, test_id=test_id, score=0)
+    test_result = TestResult(user_id=user_id, exam_id=exam_id, score=0)
     db.session.add(test_result)
     db.session.commit()
 
@@ -302,7 +302,7 @@ def submit_test(test_id):
     db.session.commit()
 
     # Mark the test as no longer accessible
-    test_access = TestAccess.query.filter_by(user_id=user_id, test_id=test_id).first()
+    test_access = TestAccess.query.filter_by(user_id=user_id, exam_id=exam_id).first()
     if test_access:
         test_access.is_accessible = False
         db.session.commit()
@@ -324,15 +324,15 @@ def submit_test(test_id):
 
 
 
-@app.route('/request_access/<int:test_id>', methods=['POST'])
+@app.route('/request_access/<int:exam_id>', methods=['POST'])
 @login_required
-def request_access(test_id):
-    test = Test.query.get_or_404(test_id)
-    existing_request = TestAccessRequest.query.filter_by(user_id=current_user.id, test_id=test_id, status='pending').first()
+def request_access(exam_id):
+    test = Test.query.get_or_404(exam_id)
+    existing_request = TestAccessRequest.query.filter_by(user_id=current_user.id, exam_id=exam_id, status='pending').first()
     if existing_request:
         flash('You have already requested access to this test.', 'info')
     else:
-        new_request = TestAccessRequest(user_id=current_user.id, test_id=test_id)
+        new_request = TestAccessRequest(user_id=current_user.id, exam_id=exam_id)
         db.session.add(new_request)
         db.session.commit()
         flash('Your access request has been submitted and is pending approval.', 'success')
@@ -360,7 +360,7 @@ def approve_access(request_id):
     access_request.status = 'approved'
     access_request.response_date = datetime.utcnow()
     
-    new_access = TestAccess(user_id=access_request.user_id, test_id=access_request.test_id, is_accessible=True)
+    new_access = TestAccess(user_id=access_request.user_id, exam_id=access_request.exam_id, is_accessible=True)
     db.session.add(new_access)
     db.session.commit()
 
@@ -393,31 +393,31 @@ def grant_test_access(user_id):
         return redirect(url_for('home'))
 
     user = User.query.get_or_404(user_id)
-    test_id = request.form['test_id']
-    test = Test.query.get_or_404(test_id)
+    exam_id = request.form['exam_id']
+    test = Test.query.get_or_404(exam_id)
 
     # Check if the user already has access to the test
-    existing_access = TestAccess.query.filter_by(user_id=user.id, test_id=test.id).first()
+    existing_access = TestAccess.query.filter_by(user_id=user.id, exam_id=test.id).first()
     if existing_access:
         flash(f'User "{user.username}" already has access to the test "{test.title}".', 'info')
     else:
         # Grant access to the test
-        new_access = TestAccess(user_id=user.id, test_id=test.id, is_accessible=True)
+        new_access = TestAccess(user_id=user.id, exam_id=test.id, is_accessible=True)
         db.session.add(new_access)
         db.session.commit()
         flash(f'Access to test "{test.title}" has been granted to user "{user.username}".', 'success')
 
     return redirect(url_for('manage_users'))
 
-@app.route('/admin/manage_questions/<int:test_id>', methods=['GET', 'POST'])
+@app.route('/admin/manage_questions/<int:exam_id>', methods=['GET', 'POST'])
 @login_required
-def manage_questions(test_id):
+def manage_questions(exam_id):
     if not current_user.is_admin:
         flash('You do not have permission to access this page.', 'error')
         return redirect(url_for('home'))
 
-    test = Test.query.get_or_404(test_id)
-    questions = Question.query.filter_by(test_id=test.id).all()
+    test = Test.query.get_or_404(exam_id)
+    questions = Question.query.filter_by(exam_id=test.id).all()
 
     if request.method == 'POST':
         question_type = request.form['question_type']
@@ -436,7 +436,7 @@ def manage_questions(test_id):
                 option_c=option_c,
                 option_d=option_d,
                 correct_answer=correct_answer,
-                test_id=test.id
+                exam_id=test.id
             )
         elif question_type == 'true_false':
             question = Question(
@@ -444,16 +444,16 @@ def manage_questions(test_id):
                 option_a='True',
                 option_b='False',
                 correct_answer='A' if correct_answer.lower() == 'true' else 'B',
-                test_id=test.id
+                exam_id=test.id
             )
         else:
             flash('Invalid question type.', 'error')
-            return redirect(url_for('manage_questions', test_id=test.id))
+            return redirect(url_for('manage_questions', exam_id=test.id))
 
         db.session.add(question)
         db.session.commit()
         flash(f'Question added to test "{test.title}".', 'success')
-        return redirect(url_for('manage_questions', test_id=test.id))
+        return redirect(url_for('manage_questions', exam_id=test.id))
 
     return render_template('manage_questions.html', test=test, questions=questions)
 
@@ -609,12 +609,12 @@ def delete_question(question_id):
         return redirect(url_for('home'))
 
     question = Question.query.get_or_404(question_id)
-    test_id = question.test_id  # Store the test ID before deleting the question
+    exam_id = question.exam_id  # Store the test ID before deleting the question
     db.session.delete(question)
     db.session.commit()
 
     flash('Question deleted successfully.', 'success')
-    return redirect(url_for('manage_questions', test_id=test_id))
+    return redirect(url_for('manage_questions', exam_id=exam_id))
 
 
 @app.route('/admin/revoke_test_access/<int:user_id>', methods=['POST'])
@@ -625,10 +625,10 @@ def revoke_test_access(user_id):
         return redirect(url_for('home'))
 
     user = User.query.get_or_404(user_id)
-    test_id = request.form['test_id']
+    exam_id = request.form['exam_id']
     
     # Eager load the test relationship using joinedload
-    access = TestAccess.query.options(joinedload(TestAccess.test)).filter_by(user_id=user.id, test_id=test_id).first()
+    access = TestAccess.query.options(joinedload(TestAccess.test)).filter_by(user_id=user.id, exam_id=exam_id).first()
 
     if access:
         db.session.delete(access)
@@ -731,23 +731,23 @@ def add_test_command(title):
     click.echo(f'Test "{title}" added successfully with ID: {new_test.id}')
 
 
-@app.route('/admin/edit_test/<int:test_id>', methods=['GET', 'POST'])
+@app.route('/admin/edit_test/<int:exam_id>', methods=['GET', 'POST'])
 @login_required
-def edit_test(test_id):
+def edit_test(exam_id):
     if not current_user.is_admin:
         flash('You do not have permission to access this page.', 'error')
         return redirect(url_for('home'))
 
-    test = Test.query.get_or_404(test_id)
+    test = Test.query.get_or_404(exam_id)
 
     if request.method == 'POST':
         title = request.form['title'].strip()
 
         # Check if a test with the new title already exists
         existing_test = Test.query.filter_by(title=title).first()
-        if existing_test and existing_test.id != test_id:
+        if existing_test and existing_test.id != exam_id:
             flash(f'A test with the title "{title}" already exists. Please choose a different title.', 'error')
-            return redirect(url_for('edit_test', test_id=test_id))
+            return redirect(url_for('edit_test', exam_id=exam_id))
 
         if title:
             test.title = title
@@ -770,8 +770,8 @@ def add_question():
     tests = Test.query.all()  # Get all available tests
 
     if request.method == 'POST':
-        test_id = request.form['test_id']  # Get the selected test ID
-        test = Test.query.get_or_404(test_id)
+        exam_id = request.form['exam_id']  # Get the selected test ID
+        test = Test.query.get_or_404(exam_id)
 
         question_type = request.form['question_type']
         content = request.form['content']
@@ -789,7 +789,7 @@ def add_question():
                 option_c=option_c,
                 option_d=option_d,
                 correct_answer=correct_answer,
-                test_id=test.id
+                exam_id=test.id
             )
         elif question_type == 'true_false':
             question = Question(
@@ -797,7 +797,7 @@ def add_question():
                 option_a='True',
                 option_b='False',
                 correct_answer='A' if correct_answer.lower() == 'true' else 'B',
-                test_id=test.id
+                exam_id=test.id
             )
         else:
             flash('Invalid question type.', 'error')
@@ -823,8 +823,8 @@ def import_questions():
 
     if request.method == 'POST':
         file = request.files['file']
-        test_id = request.form.get('test_id')
-        test = Test.query.get(test_id)  # Fetch the test
+        exam_id = request.form.get('exam_id')
+        test = Test.query.get(exam_id)  # Fetch the test
 
         if not test:
             flash('Test not found.', 'error')
@@ -865,7 +865,7 @@ def import_questions():
                     option_c=option_c,
                     option_d=option_d,
                     correct_answer=correct_answer,
-                    test_id=test.id  # Ensure this is set
+                    exam_id=test.id  # Ensure this is set
                 )
                 db.session.add(question)
             except Exception as e:
@@ -875,7 +875,7 @@ def import_questions():
 
         db.session.commit()
         flash('Questions imported successfully!', 'success')
-        return redirect(url_for('manage_questions', test_id=test.id))
+        return redirect(url_for('manage_questions', exam_id=test.id))
 
     return render_template('import_questions.html', tests=tests)
 
@@ -902,14 +902,14 @@ def admin_redirect():
         return redirect(url_for('home'))
 
 
-@app.route('/admin/delete_test/<int:test_id>', methods=['POST'])
+@app.route('/admin/delete_test/<int:exam_id>', methods=['POST'])
 @login_required
-def delete_test(test_id):
+def delete_test(exam_id):
     if not current_user.is_admin:
         flash('You do not have permission to perform this action.', 'error')
         return redirect(url_for('home'))
 
-    test = Test.query.get_or_404(test_id)
+    test = Test.query.get_or_404(exam_id)
 
     # Delete the test from the database
     db.session.delete(test)
@@ -920,15 +920,15 @@ def delete_test(test_id):
 
 
 
-@app.route('/take_test/<int:test_id>', methods=['GET', 'POST'])
+@app.route('/take_test/<int:exam_id>', methods=['GET', 'POST'])
 @login_required
-def take_test(test_id):
-    test_access = TestAccess.query.filter_by(user_id=current_user.id, test_id=test_id).first()
+def take_test(exam_id):
+    test_access = TestAccess.query.filter_by(user_id=current_user.id, exam_id=exam_id).first()
     if not test_access or not test_access.is_accessible:
         flash('You do not have access to this test.', 'error')
         return redirect(url_for('home'))
 
-    test = Test.query.get_or_404(test_id)
+    test = Test.query.get_or_404(exam_id)
     total_questions = len(test.questions)
 
     # Initialize session data if not already present
@@ -961,7 +961,7 @@ def take_test(test_id):
 
         elif action == 'submit_test':
             session.modified = True  # Ensure session is saved before redirect
-            return redirect(url_for('submit_test', test_id=test_id))
+            return redirect(url_for('submit_test', exam_id=exam_id))
 
         session.modified = True
 
@@ -993,10 +993,10 @@ def take_test(test_id):
 
 
 
-@app.route('/request_retake/<int:test_id>', methods=['POST'])
+@app.route('/request_retake/<int:exam_id>', methods=['POST'])
 @login_required
-def request_retake(test_id):
-    test_access = TestAccess.query.filter_by(user_id=current_user.id, test_id=test_id).first()
+def request_retake(exam_id):
+    test_access = TestAccess.query.filter_by(user_id=current_user.id, exam_id=exam_id).first()
     if test_access:
         test_access.is_accessible = True
         db.session.commit()

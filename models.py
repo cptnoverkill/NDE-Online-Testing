@@ -30,10 +30,10 @@ class Exam(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     question_count = db.Column(db.Integer, nullable=False, default=10)
-    exam_results = relationship('TestResult', back_populates='test', cascade='all, delete-orphan')
+    exam_results = relationship('ExamResult', back_populates='test', cascade='all, delete-orphan')
     questions = relationship('Question', back_populates='test', cascade='all, delete-orphan')
-    accesses = db.relationship('TestAccess', back_populates='test', lazy=True, cascade="all, delete-orphan")
-    access_requests = db.relationship('TestAccessRequest', back_populates='test', lazy=True, cascade="all, delete-orphan")
+    accesses = db.relationship('ExamAccess', back_populates='test', lazy=True, cascade="all, delete-orphan")
+    access_requests = db.relationship('ExamAccessRequest', back_populates='test', lazy=True, cascade="all, delete-orphan")
    
     def get_random_questions(self):
         """Get a random subset of questions based on question_count."""
@@ -50,9 +50,9 @@ class Question(db.Model):
     option_c = db.Column(db.String(200), nullable=True)
     option_d = db.Column(db.String(200), nullable=True)
     correct_answer = db.Column(db.String(1), nullable=False)
-    test_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
+    exam_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
 
-    test = db.relationship('Test', back_populates='questions')
+    exam = db.relationship('Test', back_populates='questions')
     missed_questions = db.relationship('MissedQuestion', back_populates='question', lazy=True)
 
     def get_user_answer(self, test_result, user_answers=None):
@@ -80,7 +80,7 @@ class Question(db.Model):
 class ExamAccess(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    test_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
+    exam_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
     is_accessible = db.Column(db.Boolean, default=True)
     attempts = db.Column(db.Integer, default=0)
 
@@ -91,7 +91,7 @@ class ExamAccess(db.Model):
 class ExamResult(db.Model):
         id = Column(Integer, primary_key=True)
         user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-        test_id = Column(Integer, ForeignKey('test.id', ondelete='CASCADE'), nullable=False)
+        exam_id = Column(Integer, ForeignKey('test.id', ondelete='CASCADE'), nullable=False)
         score = Column(Float, nullable=False)
         date_submitted = Column(DateTime, default=datetime.utcnow)
 
@@ -99,16 +99,16 @@ class ExamResult(db.Model):
         test = relationship('Test', back_populates='exam_results')
         missed_questions = relationship('MissedQuestion', back_populates='test_result', cascade='all, delete-orphan')
 
-        def __init__(self, user_id, test_id, score):
+        def __init__(self, user_id, exam_id, score):
             self.user_id = user_id
-            self.test_id = test_id
+            self.exam_id = exam_id
             self.score = score
 
 # TestAccessRequest model
 class ExamAccessRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    test_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
+    exam_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
     status = db.Column(db.String(20), default='pending')  # 'pending', 'approved', 'denied'
     request_date = db.Column(db.DateTime, default=datetime.utcnow)
     response_date = db.Column(db.DateTime)
