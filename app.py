@@ -25,7 +25,7 @@ from models import db, User, Exam, Question, ExamAccess, ExamResult, MissedQuest
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['SECRET_KEY'] = 'FF93B3ABE7'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or'sqlite:///knowledge_test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
