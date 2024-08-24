@@ -19,7 +19,7 @@ import pdfkit
 import pytz
 from flask import render_template, make_response, session
 import logging
-from models import db, User, Test, Question, TestAccess, TestResult, MissedQuestion, TestAccessRequest
+from models import db, User, Exam, Question, ExamAccess, ExamResult, MissedQuestion, ExamAccessRequest
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
