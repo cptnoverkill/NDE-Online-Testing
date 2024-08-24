@@ -1,0 +1,15 @@
+<!-- edit_test.html -->
+{% extends "base.html" %}
+{% block content %}
+    <h1>Edit Test</h1>
+
+    <form method="POST">
+        <div class="form-group">
+            <label for="title">Test Title:</label>
+            <input type="text" name="title" id="title" class="form-control" value="{{ test.title }}" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Test</button>
+        <a href="{{ url_for('manage_tests') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+{% endblock %}

@@ -1,0 +1,11 @@
+<!-- templates/list_tests.html -->
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<h2>Available Tests</h2>
+<ul>
+    {% for test in tests %}
+    <li>Test ID: {{ test.id }}, Title: {{ test.title }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

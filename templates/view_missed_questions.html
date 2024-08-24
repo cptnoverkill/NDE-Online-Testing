@@ -1,0 +1,13 @@
+<!-- view_missed_questions.html -->
+{% extends "base.html" %}
+{% block title %}View Missed Questions{% endblock %}
+{% block content %}
+    <h1>Missed Questions for Test Result</h1>
+    {% for missed_question in result.missed_questions %}
+        <div class="missed-question">
+            <p>Question: {{ missed_question.question.content }}</p>
+            <p>Correct Answer: {{ missed_question.question.correct_answer }}</p>
+            <p>User's Answer: {{ missed_question.user_answer }}</p>
+        </div>
+    {% endfor %}
+{% endblock %}

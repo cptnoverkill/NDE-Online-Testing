@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Result Export</title>
+    <style>
+        /* Existing styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #fff;
+            padding: 20px;
+        }
+        .container {
+            width: 800px;
+            margin: 0 auto;
+            border: 8px solid black;
+            padding: 30px;
+            text-align: center;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border-bottom: 6px solid black;
+        }
+        .header div {
+            text-align: center;
+            width: 50%;
+        }
+        .logo img {
+            width: 150px;
+            margin: 30px auto;
+        }
+        h1 {
+            font-size: 22px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+        .score-info {
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        .score-info p {
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .score-info p strong {
+            width: 80%;
+            text-align: right;
+        }
+        .score-info p span {
+            width: 50%;
+            text-align: center;
+            border-bottom: 2px solid black;
+            margin-left: 10px;
+        }
+        .signature-section {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 50%;
+            margin: 0 auto;
+        }
+        .signature-fields {
+            width: 100%;
+        }
+        .signature-fields p {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .signature-line {
+            border-bottom: 2px solid black;
+            flex-grow: 1;
+            margin-left: 10px;
+        }
+        .signature-wrapper {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .signature-wrapper strong {
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+
+        .signature-pad {
+            border-bottom: 2px solid black;
+            width: 100%;
+            height: 100px;
+            display: block;
+            margin-left: 10px;
+            flex-grow: 1;
+        }
+
+
+        .stamp-proctor {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .stamp-proctor .stamp {
+            margin-bottom: 20px;
+        }
+        .stamp-proctor .stamp img {
+            max-height: 100px;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .footer p {
+            margin: 5px 0;
+            margin-bottom: 20px;
+        }
+
+        /* New styles for questions and answers */
+        .questions-section {
+            margin-top: 40px;
+            text-align: left;
+            font-size: 16px;
+            width: 90%;
+            margin: 0 auto;
+        }
+        .questions-section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .questions-section th, .questions-section td {
+            padding: 12px;
+            border: 2px solid black;
+            text-align: left;
+        }
+        .questions-section th {
+            background-color: #f2f2f2;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .questions-section td {
+            background-color: #fff;
+            text-transform: uppercase;
+        }
+
+        @media print {
+            .btn-clear {
+                display: none;
+            }
+
+            .stamp img {
+                max-height: 80px;
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <p><strong>Author Name:</strong> Ken Criss</p>
+            </div>
+            <div>
+                <p><strong>Test Creation Date:</strong> 03/14/2017</p>
+            </div>
+        </div>
+
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+        </div>
+
+        <h1>{{ test_result.test.title }} Results</h1>
+
+        <div class="score-info">
+            <p><strong>Score:</strong> <span>{{ "%.2f"|format(test_result.score) }}%</span></p>
+            <p><strong>Total # of Questions:</strong> <span>{{ test_result.test.questions|length }}</span></p>
+        </div>
+
+        <div class="signature-section">
+            <div class="signature-fields">
+                <p><strong>Name:</strong> <span class="signature-line">{{ test_result.user.username }}</span></p>
+                <div class="signature-wrapper">
+                    <strong>Signature:</strong>
+                    <canvas id="signature-pad1" class="signature-pad"></canvas>
+                    <button id="clear1" class="btn-clear">Clear</button>
+                </div>
+                <p><strong>Date:</strong> <span class="signature-line">{{ test_result.date_submitted.strftime('%Y-%m-%d') }}</span></p>
+            </div>
+        </div>
+
+        <div class="stamp-proctor">
+            <div class="stamp">
+                <img src="{{ url_for('static', filename='images/ken-stamp-2.png') }}" alt="Stamp">
+            </div>
+            <div class="proctor-signature">
+                <p>Proctor: {{ proctor_name}} | ASNT NDT Level III #292436</p>
+                <canvas id="signature-pad2" class="signature-pad"></canvas>
+                <button id="clear2" class="btn-clear">Clear</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>This test meets the required standards of ASNT SNT-TC-1A, CP-189 and Coast to Coast Practice for Qualification and Cretification of Nondestructive Testing Personnel.</p>
+            <p style ="font-style: italic; font-weight: bold;">Material in this test packet is considered confidential and is not to be shared with other employees.</p>
+        </div>
+    </div>
+
+    <div class="questions-section">
+        <h2>Missed Questions</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Question</th>
+            <th>Your Answer</th>
+            <th>Correct Answer</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for missed_question in test_result.missed_questions %}
+            <tr>
+                <td>{{ missed_question.question.content }}</td>
+                <td>{{ missed_question.user_answer }}</td>
+                <td>
+                    {{ missed_question.question.correct_answer }},
+                    {% if missed_question.question.correct_answer == 'A' %}
+                        {{ missed_question.question.option_a }}
+                    {% elif missed_question.question.correct_answer == 'B' %}
+                        {{ missed_question.question.option_b }}
+                    {% elif missed_question.question.correct_answer == 'C' %}
+                        {{ missed_question.question.option_c }}
+                    {% elif missed_question.question.correct_answer == 'D' %}
+                        {{ missed_question.question.option_d }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Correctly Answered Questions</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Question</th>
+          
+            <th>Your Answer / Correct Answer</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for question in test_result.test.questions %}
+            {% if question.id not in test_result.missed_questions | map(attribute='question_id') %}
+                <tr>
+                    <td>{{ question.content }}</td>
+ 
+                    <td>
+                        {{ question.correct_answer }},
+                        {% if question.correct_answer == 'A' %}
+                            {{ question.option_a }}
+                        {% elif question.correct_answer == 'B' %}
+                            {{ question.option_b }}
+                        {% elif question.correct_answer == 'C' %}
+                            {{ question.option_c }}
+                        {% elif question.correct_answer == 'D' %}
+                            {{ question.option_d }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+
+        
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js"></script>
+    <script>
+        var canvas1 = document.getElementById('signature-pad1');
+        var signaturePad1 = new SignaturePad(canvas1);
+
+        document.getElementById('clear1').addEventListener('click', function () {
+            signaturePad1.clear();
+        });
+
+        var canvas2 = document.getElementById('signature-pad2');
+        var signaturePad2 = new SignaturePad(canvas2);
+
+        document.getElementById('clear2').addEventListener('click', function () {
+            signaturePad2.clear();
+        });
+    </script>
+</body>
+</html>

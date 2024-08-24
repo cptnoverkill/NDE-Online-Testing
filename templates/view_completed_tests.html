@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Completed Test: {{ test_result.test.title }}</h1>
+    <p><strong>User:</strong> {{ test_result.user.username }}</p>
+    <p><strong>Score:</strong> {{ test_result.score }} out of {{ test_result.test.questions|length }}</p>
+    <p><strong>Date Submitted:</strong> {{ test_result.date_submitted.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+
+    <h2>Questions</h2>
+    <ul>
+        {% for question in questions %}
+            <li>
+                <p><strong>Question:</strong> {{ question.content }}</p>
+                <ul>
+                    <li>A: {{ question.option_a }}</li>
+                    <li>B: {{ question.option_b }}</li>
+                    {% if question.option_c %}<li>C: {{ question.option_c }}</li>{% endif %}
+                    {% if question.option_d %}<li>D: {{ question.option_d }}</li>{% endif %}
+                </ul>
+                <p><strong>Your Answer:</strong> {{ test_result.answers|selectattr("question_id", "equalto", question.id)|first.user_answer }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('generate_pdf', result_id=test_result.id) }}" class="btn btn-primary">Print as PDF</a>
+{% endblock %}

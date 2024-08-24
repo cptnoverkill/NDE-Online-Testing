@@ -1,0 +1,94 @@
+<!-- manage_questions.html -->
+{% extends "base.html" %}
+{% block content %}
+    <h1>Manage Questions for {{ test.title }}</h1>
+
+    <!-- Link to Import Questions -->
+    <a href="{{ url_for('import_questions', test_id=test.id) }}" class="btn btn-secondary" style="margin-top: 20px;">Import Questions</a>
+
+    <!-- Existing Questions -->
+    <h2>Existing Questions</h2>
+    {% if questions %}
+        <ul style="list-style-type: none; padding: 0;">
+            {% for question in questions %}
+                <li style="margin-bottom: 10px; border-bottom: white solid 1px; padding: 10px; display: flex; justify-content: space-between;">
+                    <div>
+                        <p><strong>Question:</strong> {{ question.content }}</p>
+                        <p><strong>Options:</strong></p>
+                        <ul>
+                            <li style="{% if question.correct_answer == 'A' %}color: green; font-weight: bold;{% endif %}">
+                                A: {{ question.option_a }}
+                            </li>
+                            <li style="{% if question.correct_answer == 'B' %}color: green; font-weight: bold;{% endif %}">
+                                B: {{ question.option_b }}
+                            </li>
+                            {% if question.option_c %}
+                            <li style="{% if question.correct_answer == 'C' %}color: green; font-weight: bold;{% endif %}">
+                                C: {{ question.option_c }}
+                            </li>
+                            {% endif %}
+                            {% if question.option_d %}
+                            <li style="{% if question.correct_answer == 'D' %}color: green; font-weight: bold;{% endif %}">
+                                D: {{ question.option_d }}
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <form action="{{ url_for('delete_question', question_id=question.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this question?');">Delete</button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No questions available for this test.</p>
+    {% endif %}
+
+    <hr>
+
+    <!-- Add New Question -->
+    <h2>Add New Question</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="content">Question Content:</label>
+            <textarea name="content" id="content" class="form-control" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="question_type">Question Type:</label>
+            <select name="question_type" id="question_type" class="form-control" required>
+                <option value="multiple_choice">Multiple Choice</option>
+                <option value="true_false">True/False</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="option_a">Option A:</label>
+            <input type="text" name="option_a" id="option_a" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="option_b">Option B:</label>
+            <input type="text" name="option_b" id="option_b" class="form-control" required>
+        </div>
+        <div class="form-group multiple-choice-options">
+            <label for="option_c">Option C:</label>
+            <input type="text" name="option_c" id="option_c" class="form-control">
+        </div>
+        <div class="form-group multiple-choice-options">
+            <label for="option_d">Option D:</label>
+            <input type="text" name="option_d" id="option_d" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="correct_answer">Correct Answer:</label>
+            <select name="correct_answer" id="correct_answer" class="form-control" required>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Question</button>
+    </form>
+
+    <a href="{{ url_for('manage_tests') }}" class="btn btn-secondary" style="margin-top: 20px;">Back to Manage Tests</a>
+{% endblock %}

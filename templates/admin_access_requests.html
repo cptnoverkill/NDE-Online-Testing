@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Manage Access Requests{% endblock %}
+{% block content %}
+    <h1>Manage Access Requests</h1>
+    {% if requests %}
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Test</th>
+                    <th>Request Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in requests %}
+                    <tr>
+                        <td>{{ request.user.username }}</td>
+                        <td>{{ request.test.title }}</td>
+                        <td>{{ request.request_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>
+                            <a href="{{ url_for('approve_access', request_id=request.id) }}">Approve</a>
+                            <a href="{{ url_for('deny_access', request_id=request.id) }}">Deny</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No pending access requests.</p>
+    {% endif %}
+{% endblock %}

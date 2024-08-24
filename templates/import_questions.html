@@ -1,0 +1,24 @@
+<!-- import_questions.html -->
+{% extends "base.html" %}
+{% block content %}
+    <h1>Import Questions</h1>
+
+    <form action="{{ url_for('import_questions') }}" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="test_id">Select Test:</label>
+            <select name="test_id" id="test_id" class="form-control" required>
+                <option value="" disabled selected>Select a test</option>
+                {% for test in tests %}
+                    <option value="{{ test.id }}">{{ test.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="file">Select CSV file:</label>
+            <input type="file" name="file" id="file" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Import Questions</button>
+    </form>
+
+    <a href="{{ url_for('manage_tests') }}" class="btn btn-secondary" style="margin-top: 20px;">Back to Manage Tests</a>
+{% endblock %}

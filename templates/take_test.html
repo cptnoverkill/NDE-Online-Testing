@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}{{ test.title }}{% endblock %}
+{% block content %}
+<div class="test-container">
+    <h1 class="test-title">{{ test.title }}</h1>
+    
+    <!-- Debug Information -->
+    <div style="background-color: #ffcccc; padding: 10px; margin-bottom: 20px;">
+        <h3>Debug Info:</h3>
+        <p>Progress: {{ progress }} / {{ total_questions }}</p>
+        <p>All Questions Answered: {{ all_questions_answered }}</p>
+        <p>Current Index: {{ current_index }}</p>
+        <p>Answers: {{ answers }}</p>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress" style="width: {{ (progress / total_questions) * 100 }}%;"></div>
+        </div>
+        <div class="progress-text">Question {{ current_index + 1 }} of {{ total_questions }}</div>
+    </div>
+    
+    <div class="question-card">
+        <div class="question-number">Question {{ current_index + 1 }}</div>
+        <div class="question-text">{{ current_question.content }}</div>
+        <form method="POST" id="answerForm">
+            <input type="hidden" name="action" value="submit_answer">
+            <input type="hidden" name="answer" id="selectedAnswer">
+            <div class="options">
+                {% for option in [('A', current_question.option_a), ('B', current_question.option_b), 
+                                  ('C', current_question.option_c), ('D', current_question.option_d)] %}
+                    {% if option[1] %}
+                        <div class="option {% if answers[current_question.id|string] == option[0] %}selected{% endif %}" data-value="{{ option[0] }}">
+                            {{ option[1] }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="action-buttons">
+                <button type="submit" class="btn btn-primary" id="saveAndContinue">Save Answer and Continue</button>
+                <button type="button" class="btn btn-secondary" id="flagButton">
+                    {% if flagged[current_question.id|string] %}Unflag{% else %}Flag{% endif %} for Review
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    {% if all_questions_answered %}
+    <div class="submit-section">
+        <h3>All questions answered!</h3>
+        {% if flagged_questions %}
+            <h4>Flagged Questions:</h4>
+            <ul>
+                {% for index in flagged_questions %}
+                    <li>
+                        <a href="{{ url_for('take_test', test_id=test.id, question_index=index) }}">
+                            Question {{ index + 1 }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <form method="POST" action="{{ url_for('submit_test', test_id=test.id) }}">
+            <input type="hidden" name="action" value="submit_test">
+            <button type="submit" class="btn btn-success">Submit Test</button>
+        </form>
+    </div>
+    {% endif %}
+    
+    <div class="info-card">
+        <div class="info-title">Test Information</div>
+        <div class="info-item">Time Elapsed: {{ "%0.2f"|format(time_elapsed) }} minutes</div>
+        <div class="info-item">Questions Answered: {{ progress }} / {{ total_questions }}</div>
+        <div class="info-item">Flagged Questions: {{ flagged_questions|length }}</div>
+    </div>
+</div>
+
+<style>
+    /* Your existing styles here */
+    .test-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .progress-bar {
+        background-color: #e0e0e0;
+        height: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .progress {
+        background-color: #4CAF50;
+        height: 100%;
+        border-radius: 10px;
+    }
+    .question-card {
+        background-color: #2b2a2a;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .options {
+        display: grid;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .option {
+        background-color: #474747;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .option:hover {
+        background-color: #d0d0d0;
+        color:#2b2a2a;
+    }
+    .option.selected {
+        background-color: #4CAF50;
+        color: white;
+        border-color: #45a049;
+    }
+    .action-buttons {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .btn-primary {
+        background-color: #4CAF50;
+        color: white;
+    }
+    .btn-secondary {
+        background-color: #f44336;
+        color: white;
+    }
+    .info-card {
+        background-color: #474747;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const options = document.querySelectorAll('.option');
+    const flagButton = document.getElementById('flagButton');
+    const selectedAnswerInput = document.getElementById('selectedAnswer');
+    const answerForm = document.getElementById('answerForm');
+
+    options.forEach(option => {
+        option.addEventListener('click', function() {
+            options.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedAnswerInput.value = this.getAttribute('data-value');
+        });
+    });
+
+    answerForm.addEventListener('submit', function(event) {
+        if (!selectedAnswerInput.value) {
+            event.preventDefault();
+            alert('Please select an answer before continuing.');
+        } else {
+            console.log("Form Submitted with Answer: " + selectedAnswerInput.value);
+        }
+    });
+});
+
+
+</script>
+{% endblock %}

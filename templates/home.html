@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+{% if current_user.is_authenticated %}
+    <h1>Your Tests</h1>
+
+    <style>
+        .test-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .test-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .test-card h3 {
+            margin-top: 0;
+            color: rgb(51, 51, 51);
+            font-size: 20px;
+        }
+        .test-card p {
+            margin-bottom: 10px;
+        }
+        .btn {
+            text-align: center;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+        }
+        .btn-primary {
+            background-color: #25a15d;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #f06f6f;
+            margin-left: 28px;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .accessible {
+            border-left: 5px solid #28a745;
+        }
+        .inaccessible {
+            border-left: 5px solid #dc3545;
+        }
+        .pending {
+            border-left: 5px solid #ffc107;
+        }
+        p {
+            color: black;
+        }
+        .taken-test-list {
+            margin-top: 20px;
+        }
+        .taken-test-item {
+            background-color: #f1f1f1;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+
+    <!-- Previously Taken Tests Section -->
+    <div class="taken-test-list" style="max-width: 400px;">
+        {% if taken_tests %}
+            <h2>Previously Taken Tests</h2>
+            {% for test_result in taken_tests %}
+                <div class="taken-test-item">
+                    <h3 style="color: black;">{{ test_result.test.title }}</h3>
+                    <p><strong>Score:</strong> {{ "%.2f"|format(test_result.score) }}% </p>
+                    <p><strong>Total Questions:</strong> {{ test_result.test.questions|length }} </p>
+                    <p><strong>Date Taken:</strong> {{ format_pacific_time(test_result.date_submitted) }}</p>
+                    
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: lightgray;">You haven't completed any tests yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Accessible Tests Section -->
+    <h2>Your Accessible Tests</h2>
+    <div class="test-list">
+        {% if current_user.is_admin %}
+            {% for test in accessible_tests %}
+            <div class="test-card accessible">
+                <div class="test-card-content">
+                    <h3>{{ test.title }}</h3>
+                    <p>You have access to this test.</p>
+                    <a href="{{ url_for('take_test', test_id=test.id) }}" class="btn btn-primary">Take Test</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            {% if accessible_tests %}
+                {% for test in accessible_tests %}
+                <div class="test-card accessible">
+                    <div class="test-card-content">
+                        <h3>{{ test.title }}</h3>
+                        <p>You have access to this test.</p>
+                        <a href="{{ url_for('take_test', test_id=test.id) }}" class="btn btn-primary">Take Test</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: lightgray;">No accessible tests available.</p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- Pending Approval Tests Section -->
+    {% if not current_user.is_admin %}
+    <h2>Tests Pending Approval</h2>
+    <div class="test-list">
+        {% if pending_tests %}
+            {% for test in pending_tests %}
+            <div class="test-card pending">
+                <div class="test-card-content">
+                    <h3>{{ test.title }}</h3>
+                    <p style="color: rgb(175, 7, 7);">Your request to access this test is pending approval.</p>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: lightgray;">No pending access requests.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Inaccessible Tests Section -->
+    {% if not current_user.is_admin %}
+    <h2>Request Access to Other Tests</h2>
+    <div class="test-list">
+        {% if inaccessible_tests %}
+            {% for test in inaccessible_tests %}
+            <div class="test-card inaccessible">
+                <div class="test-card-content">
+                    <h3>{{ test.title }}</h3>
+                    <p style="color:white;">You currently do not have access to this test.</p>
+                    <form method="POST" action="{{ url_for('request_access', test_id=test.id) }}">
+                        <button type="submit" class="btn btn-secondary">Request Access</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:lightgray;">No other tests available.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+{% else %}
+    <!-- No text or content displayed if the user is not logged in -->
+{% endif %}
+{% endblock %}

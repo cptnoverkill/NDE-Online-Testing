@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Manage Access Requests{% endblock %}
+{% block content %}
+<h2>Create a New Test</h2>
+<form method="POST">
+    <label for="title">Test Title</label>
+    <input type="text" name="title" id="title" required>
+    <button type="submit">Create Test</button>
+</form>
+<a href="{{ url_for('admin.index') }}">Back to Admin Dashboard</a>
+{% endblock %}

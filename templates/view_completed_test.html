@@ -1,0 +1,161 @@
+<!-- view_test_results -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Result Export</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #fff;
+            padding: 40px;
+        }
+        .container {
+            width: 800px;
+            margin: 0 auto;
+            border: 2px solid black;
+            padding: 20px;
+            text-align: center;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .header div {
+            text-align: left;
+            font-size: 14px;
+        }
+        .header div:last-child {
+            text-align: right;
+        }
+        .logo img {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 20px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+        }
+        .score-info {
+            text-align: left;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .score-info p {
+            margin: 5px 0;
+        }
+        .signature-section {
+            margin-top: 50px;
+            text-align: left;
+            font-size: 18px;
+        }
+        .signature-section p {
+            margin: 10px 0;
+        }
+        .signature-line {
+            display: inline-block;
+            width: 250px;
+            border-bottom: 1px solid black;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <p><strong>Name:</strong> {{ test_result.user.username }}</p>
+            </div>
+            <div>
+                <p><strong>Date:</strong> {{ test_result.date_submitted.strftime('%Y-%m-%d') }}</p>
+            </div>
+        </div>
+
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+        </div>
+
+        <h1>{{ test_result.test.title }} Results</h1>
+
+        <div class="score-info">
+            <p><strong>Score:</strong> <span class="signature-line">{{ "%.2f"|format(test_result.score) }}%</span></p>
+            <p><strong>Total # of Questions:</strong> <span class="signature-line">{{ test_result.test.questions|length }}</span></p>
+        </div>
+
+        <div class="signature-section">
+            <p><strong>Name:</strong> <span class="signature-line">{{ test_result.user.username }}</span></p>
+            <p><strong>Signature:</strong> <span class="signature-line"></span></p>
+            <p><strong>Date:</strong> <span class="signature-line">{{ test_result.date_submitted.strftime('%Y-%m-%d') }}</span></p>
+        </div>
+
+        <div class="footer">
+            <p>Proctor: {{ test_result.proctor_name }} | ASNT NDT Level III</p>
+            <p>This test meets the required standards...</p>
+            <p>General Exam | Page 1 of 1</p>
+        </div>
+    </div>
+
+    <h2>Questions</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Question</th>
+                <th>Your Answer</th>
+                <th>Correct Answer</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for missed_question in test_result.missed_questions %}
+            <tr>
+                <tr>
+                    
+                        <td>{{ missed_question.question.content }}</td>
+                        <td>
+                            {% if missed_question.user_answer in ['A', 'B', 'C', 'D'] %}
+                                {{ missed_question.user_answer }}, 
+                                {% if missed_question.user_answer == 'A' %}
+                                    {{ missed_question.question.option_a }}
+                                {% elif missed_question.user_answer == 'B' %}
+                                    {{ missed_question.question.option_b }}
+                                {% elif missed_question.user_answer == 'C' %}
+                                    {{ missed_question.question.option_c }}
+                                {% elif missed_question.user_answer == 'D' %}
+                                    {{ missed_question.question.option_d }}
+                                {% endif %}
+                            {% else %}
+                                {{ missed_question.user_answer }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ missed_question.question.correct_answer }},
+                            {% if missed_question.question.correct_answer == 'A' %}
+                                {{ missed_question.question.option_a }}
+                            {% elif missed_question.question.correct_answer == 'B' %}
+                                {{ missed_question.question.option_b }}
+                            {% elif missed_question.question.correct_answer == 'C' %}
+                                {{ missed_question.question.option_c }}
+                            {% elif missed_question.question.correct_answer == 'D' %}
+                                {{ missed_question.question.option_d }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    
+                
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

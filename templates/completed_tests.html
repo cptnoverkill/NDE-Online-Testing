@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Completed Tests</h2>
+{% if completed_tests %}
+    <ul style="list-style-type: none; padding: 0;">
+        {% for result in completed_tests %}
+            <li style="margin-bottom: 10px; border-bottom: white solid 1px; max-width: 600px; padding: 10px; min-height: 100px">
+                <p><strong>User:</strong> {{ result.user.username }}</p>
+                <p><strong>Test:</strong> {{ result.test.title }}</p>
+                <p><strong>Score:</strong> {{ result.score }} out of {{ result.test.questions|length }}</p>
+                <p><strong>Date Submitted:</strong> {{ result.date_submitted.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                <a href="{{ url_for('view_completed_test', result_id=result.id) }}" class="btn btn-primary btn-sm">View Details</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No completed tests available.</p>
+{% endif %}
+{% endblock %}

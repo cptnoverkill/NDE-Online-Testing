@@ -1,0 +1,67 @@
+<!-- test_results.html -->
+{% extends "base.html" %}
+{% block title %}Test Result{% endblock %}
+{% block content %}
+<style>
+    .report-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    .report-header h1 {
+        font-size: 28px;
+        margin: 0;
+    }
+    .report-header h2 {
+        font-size: 24px;
+        margin: 10px 0 30px;
+        color: #666;
+    }
+    .report-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .report-section h3 {
+        font-size: 20px;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 5px;
+        margin-bottom: 15px;
+    }
+    .report-section p {
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 5px 0;
+    }
+    .btn-primary {
+        display: block;
+        width: 200px;
+        margin: 30px auto;
+        padding: 10px;
+        text-align: center;
+    }
+</style>
+
+<div class="report-header">
+    <h1>Test Results</h1>
+    <h2>{{ test_result.test.title }}</h2>
+</div>
+
+<div class="report-section">
+    <h3>Test Details</h3>
+    <p><strong>Score:</strong> {{ "%.2f"|format(test_result.score) }}%</p>
+    <p><strong>Date Submitted:</strong> {{ format_pacific_time(test_result.date_submitted) }}</p>
+</div>
+
+<div class="report-section">
+    <h3>Answer Summary</h3>
+    {% for question in test_result.test.questions %}
+        <p><strong>Question {{ loop.index }}:</strong> {{ question.content }}</p>
+        <p><strong>Your Answer:</strong> {{ question.get_user_answer(test_result.user_id) }}</p>
+        <p><strong>Correct Answer:</strong> {{ question.correct_answer }}</p>
+        <hr>
+    {% endfor %}
+</div>
+
+<a href="{{ url_for('home') }}" class="btn btn-primary">Back to Home</a>
+{% endblock %}

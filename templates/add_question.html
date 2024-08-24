@@ -1,0 +1,66 @@
+<!-- add_question.html -->
+{% extends "base.html" %}
+{% block content %}
+    <h1>Add Question</h1>
+
+    <form method="POST">
+        <div class="form-group">
+            <label for="test_id">Select Test:</label>
+            <select name="test_id" id="test_id" class="form-control" required>
+                {% for test in tests %}
+                    <option value="{{ test.id }}">{{ test.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="question_type">Question Type:</label>
+            <select name="question_type" id="question_type" class="form-control" required>
+                <option value="multiple_choice">Multiple Choice</option>
+                <option value="true_false">True/False</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="content">Question Content:</label>
+            <textarea name="content" id="content" class="form-control" required></textarea>
+        </div>
+
+        <div id="multiple_choice_options" style="display: none;">
+            <div class="form-group">
+                <label for="option_a">Option A:</label>
+                <input type="text" name="option_a" id="option_a" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="option_b">Option B:</label>
+                <input type="text" name="option_b" id="option_b" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="option_c">Option C:</label>
+                <input type="text" name="option_c" id="option_c" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="option_d">Option D:</label>
+                <input type="text" name="option_d" id="option_d" class="form-control">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="correct_answer">Correct Answer:</label>
+            <input type="text" name="correct_answer" id="correct_answer" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Question</button>
+    </form>
+
+    <script>
+        document.getElementById('question_type').addEventListener('change', function () {
+            var multipleChoiceOptions = document.getElementById('multiple_choice_options');
+            if (this.value === 'multiple_choice') {
+                multipleChoiceOptions.style.display = 'block';
+            } else {
+                multipleChoiceOptions.style.display = 'none';
+            }
+        });
+    </script>
+{% endblock %}

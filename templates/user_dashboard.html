@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+    <h1>{{ current_user.username }}'s Dashboard</h1>
+
+    <h2>Your Test Results</h2>
+    <ul>
+        {% if test_results %}
+            {% for result in test_results %}
+            <li>
+                <strong>{{ result.test.title }}</strong>: You scored {{ result.score }} out of {{ result.test.questions|length }}.
+            </li>
+            {% endfor %}
+        {% else %}
+            <p>No test results available.</p>
+        {% endif %}
+    </ul>
+
+    <h2>Your Access Requests</h2>
+    <ul>
+        {% if requests %}
+            {% for request in requests %}
+            <li>
+                Test: <strong>{{ request.test.title }}</strong> - Status: {{ request.status }}
+            </li>
+            {% endfor %}
+        {% else %}
+            <p>No access requests found.</p>
+        {% endif %}
+    </ul>
+{% endblock %}
