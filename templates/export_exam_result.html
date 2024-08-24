@@ -189,22 +189,22 @@
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
         </div>
 
-        <h1>{{ Exam_result.exam.title }} Results</h1>
+        <h1>{{ exam_result.exam.title }} Results</h1>
 
         <div class="score-info">
-            <p><strong>Score:</strong> <span>{{ "%.2f"|format(Exam_result.score) }}%</span></p>
-            <p><strong>Total # of Questions:</strong> <span>{{ Exam_result.exam.questions|length }}</span></p>
+            <p><strong>Score:</strong> <span>{{ "%.2f"|format(exam_result.score) }}%</span></p>
+            <p><strong>Total # of Questions:</strong> <span>{{ exam_result.exam.questions|length }}</span></p>
         </div>
 
         <div class="signature-section">
             <div class="signature-fields">
-                <p><strong>Name:</strong> <span class="signature-line">{{ Exam_result.user.username }}</span></p>
+                <p><strong>Name:</strong> <span class="signature-line">{{ exam_result.user.username }}</span></p>
                 <div class="signature-wrapper">
                     <strong>Signature:</strong>
                     <canvas id="signature-pad1" class="signature-pad"></canvas>
                     <button id="clear1" class="btn-clear">Clear</button>
                 </div>
-                <p><strong>Date:</strong> <span class="signature-line">{{ Exam_result.date_submitted.strftime('%Y-%m-%d') }}</span></p>
+                <p><strong>Date:</strong> <span class="signature-line">{{ exam_result.date_submitted.strftime('%Y-%m-%d') }}</span></p>
             </div>
         </div>
 
@@ -236,7 +236,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for missed_question in Exam_result.missed_questions %}
+        {% for missed_question in exam_result.missed_questions %}
             <tr>
                 <td>{{ missed_question.question.content }}</td>
                 <td>{{ missed_question.user_answer }}</td>
@@ -267,8 +267,8 @@
         </tr>
     </thead>
     <tbody>
-        {% for question in Exam_result.exam.questions %}
-            {% if question.id not in Exam_result.missed_questions | map(attribute='question_id') %}
+        {% for question in exam_result.exam.questions %}
+            {% if question.id not in exam_result.missed_questions | map(attribute='question_id') %}
                 <tr>
                     <td>{{ question.content }}</td>
  

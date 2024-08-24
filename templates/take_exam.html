@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}{{ Exam.title }}{% endblock %}
+{% block title %} {{ exam.title }} {% endblock %}
 {% block content %}
-<div class="Exam-container">
-    <h1 class="Exam-title">{{ Exam.title }}</h1>
+<div class="exam-container">
+    <h1 class="exam-title">{{ exam.title }}</h1>
     
     <!-- Debug Information -->
     <div style="background-color: #ffcccc; padding: 10px; margin-bottom: 20px;">
@@ -60,8 +60,8 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        <form method="POST" action="{{ url_for('submit_Exam', Exam_id=Exam.id) }}">
-            <input type="hidden" name="action" value="submit_Exam">
+        <form method="POST" action="{{ url_for('submit_exam', exam_id=exam.id) }}">
+            <input type="hidden" name="action" value="submit_exam">
             <button type="submit" class="btn btn-success">Submit Exam</button>
         </form>
     </div>

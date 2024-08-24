@@ -9,10 +9,10 @@
                 <a href="{{ url_for('manage_users') }}" class="btn btn-secondary" style="color:rgb(255, 145, 0);">Manage Users</a>
             </li>
             <li style="margin-bottom: 10px;">
-                <a href="{{ url_for('manage_Exams') }}" class="btn btn-secondary" style="color:rgb(255, 145, 0);">Manage Exams</a>
+                <a href="{{ url_for('manage_exams') }}" class="btn btn-secondary" style="color:rgb(255, 145, 0);">Manage Exams</a>
             </li>
             <li style="margin-bottom: 10px;">
-                <a href="{{ url_for('create_Exam') }}" class="btn btn-secondary" style="color:rgb(255, 145, 0);">Create New Exam</a>
+                <a href="{{ url_for('create_exam') }}" class="btn btn-secondary" style="color:rgb(255, 145, 0);">Create New Exam</a>
             </li>
         </ul>
     </nav>
@@ -45,23 +45,23 @@
 
     <!-- Completed Exams -->
     <h2>Completed Exams</h2>
-    {% if completed_Exams %}
+    {% if completed_exams %}
         <ul style="list-style-type: none; padding: 0;">
-            {% for Exam_result in completed_Exams %}
+            {% for exam_result in completed_exams %}
                 <li style="margin-bottom: 20px; border: 1px solid #444; padding: 15px; border-radius: 5px;">
                     <div>
-                        <h3 style="margin-top: 0;">{{ Exam_result.exam.title }}</h3>
-                        <p><strong>User:</strong> {{ Exam_result.user.username }}</p>
-                        <p><strong>Score:</strong> {{ "%.2f"|format(Exam_result.score) }}%</p>
-                        <p><strong>Completed on:</strong> {{ Exam_result.date_submitted.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                        <h3 style="margin-top: 0;">{{ exam_result.exam.title }}</h3>
+                        <p><strong>User:</strong> {{ exam_result.user.username }}</p>
+                        <p><strong>Score:</strong> {{ "%.2f"|format(exam_result.score) }}%</p>
+                        <p><strong>Completed on:</strong> {{ exam_result.date_submitted.strftime('%Y-%m-%d %H:%M:%S') }}</p>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-                        <a href="{{ url_for('view_completed_Exam', Exam_result_id=Exam_result.id) }}" class="btn btn-info btn-sm">View Details</a>
-                        <form action="{{ url_for('export_Exam_result', Exam_result_id=Exam_result.id) }}" method="GET" style="display:inline;">
+                        <a href="{{ url_for('view_completed_exam', exam_result_id=exam_result.id) }}" class="btn btn-info btn-sm">View Details</a>
+                        <form action="{{ url_for('export_exam_result', exam_result_id=exam_result.id) }}" method="GET" style="display:inline;">
                             <button type="submit" class="btn btn-secondary btn-sm">Export PDF</button>
                         </form>
-                        <form action="{{ url_for('delete_completed_Exam', Exam_result_id=Exam_result.id) }}" method="POST" style="display:inline;">
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this Exam result?');">Delete</button>
+                        <form action="{{ url_for('delete_completed_exam', exam_result_id=exam_result.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this exam result?');">Delete</button>
                         </form>
                     </div>
                 </li>

@@ -1,10 +1,10 @@
 <!-- manage_questions.html -->
 {% extends "base.html" %}
 {% block content %}
-    <h1>Manage Questions for {{ Exam.title }}</h1>
+    <h1>Manage Questions for {{ exam.title }}</h1>
 
     <!-- Link to Import Questions -->
-    <a href="{{ url_for('import_questions', Exam_id=Exam.id) }}" class="btn btn-secondary" style="margin-top: 20px;">Import Questions</a>
+    <a href="{{ url_for('import_questions', exam_id=exam.id) }}" class="btn btn-secondary" style="margin-top: 20px;">Import Questions</a>
 
     <!-- Existing Questions -->
     <h2>Existing Questions</h2>
@@ -90,5 +90,5 @@
         <button type="submit" class="btn btn-primary">Add Question</button>
     </form>
 
-    <a href="{{ url_for('manage_Exams') }}" class="btn btn-secondary" style="margin-top: 20px;">Back to Manage Exams</a>
+    <a href="{{ url_for('manage_exams') }}" class="btn btn-secondary" style="margin-top: 20px;">Back to Manage Exams</a>
 {% endblock %}

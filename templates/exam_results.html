@@ -44,7 +44,7 @@
 
 <div class="report-header">
     <h1>Exam Results</h1>
-    <h2>{{ Exam_result.exam.title }}</h2>
+    <h2>{{ exam_result.exam.title }}</h2>
 </div>
 
 <div class="report-section">
@@ -55,9 +55,9 @@
 
 <div class="report-section">
     <h3>Answer Summary</h3>
-    {% for question in Exam_result.exam.questions %}
+    {% for question in exam_result.exam.questions %}
         <p><strong>Question {{ loop.index }}:</strong> {{ question.content }}</p>
-        <p><strong>Your Answer:</strong> {{ question.get_user_answer(Exam_result.user_id) }}</p>
+        <p><strong>Your Answer:</strong> {{ question.get_user_answer(exam_result.user_id) }}</p>
         <p><strong>Correct Answer:</strong> {{ question.correct_answer }}</p>
         <hr>
     {% endfor %}
