@@ -5,7 +5,7 @@ from flask_login import UserMixin, current_user
 import random
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, Float
-import pyExam
+import pytest
 
 db = SQLAlchemy()
 

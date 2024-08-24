@@ -142,7 +142,7 @@
     background-color: #447e47;
   }
   
-  .test-item, .user-item, .question-item, .missed-question {
+  .exam-item, .user-item, .question-item, .missed-question {
     background-color: var(--bg-secondary);
     padding: 1rem;
     margin-bottom: 1rem;
