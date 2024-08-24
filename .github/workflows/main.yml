@@ -1,4 +1,6 @@
 name: CI
+ci:
+  skip: true
 
 on:
   push:
