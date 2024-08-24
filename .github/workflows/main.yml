@@ -26,6 +26,11 @@ jobs:
     - name: Check installed packages
       run: pip list  # This helps to verify pytest is installed
 
-   # - name: Run tests
+      # - name: Run tests
    #   run: |
    #     pytest app.py
+
+    - name: Deploy to Heroku
+      run: |
+        heroku login
+        git push heroku main

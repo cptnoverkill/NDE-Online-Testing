@@ -20,12 +20,13 @@ import pytz
 from flask import render_template, make_response, session
 import logging
 import pytest
+import os
 from models import db, User, Exam, Question, ExamAccess, ExamResult, MissedQuestion, ExamAccessRequest
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///knowledge_test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or'sqlite:///knowledge_test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config.update(
