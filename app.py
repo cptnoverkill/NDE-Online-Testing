@@ -19,7 +19,9 @@ import pdfkit
 import pytz
 from flask import render_template, make_response, session
 import logging
+import pytest
 from models import db, User, Exam, Question, ExamAccess, ExamResult, MissedQuestion, ExamAccessRequest
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -117,21 +119,21 @@ def home():
 
             for access in Exam_accesses:
                 if access.is_accessible:
-                    accessible_Exams.append(access.exam)
+                    accessible_Exams.append(access.Exam)
                 else:
-                    inaccessible_Exams.append(access.exam)
+                    inaccessible_Exams.append(access.Exam)
 
             # Get Exams the user has requested access to, but are pending approval
             pending_requests = ExamAccessRequest.query.filter_by(user_id=current_user.id, status='pending').all()
-            pending_Exams = [request.exam for request in pending_requests]
+            pending_Exams = [request.Exam for request in pending_requests]
 
             # Get Exams the user has not requested access to
-            all_accessible_exam_ids = [exam.id for Exam in accessible_Exams]
-            all_inaccessible_exam_ids = [exam.id for Exam in inaccessible_Exams]
-            all_pending_exam_ids = [exam.id for Exam in pending_Exams]
-            all_exam_ids = all_accessible_exam_ids + all_inaccessible_exam_ids + all_pending_exam_ids
+            all_accessible_Exam_ids = [Exam.id for Exam in accessible_Exams]
+            all_inaccessible_Exam_ids = [Exam.id for Exam in inaccessible_Exams]
+            all_pending_Exam_ids = [Exam.id for Exam in pending_Exams]
+            all_Exam_ids = all_accessible_Exam_ids + all_inaccessible_Exam_ids + all_pending_Exam_ids
 
-            unavailable_Exams = Exam.query.filter(~exam.id.in_(all_exam_ids)).all()
+            unavailable_Exams = Exam.query.filter(~Exam.id.in_(all_Exam_ids)).all()
             inaccessible_Exams.extend(unavailable_Exams)
 
         # Ensure no duplicates
@@ -235,7 +237,7 @@ def manage_Exam_session():
         session.pop('flagged', None)
         session.pop('current_index', None)
         session.pop('start_time', None)
-    elif 'Exam_submitted' in session and request.endpoint != 'exam_results':
+    elif 'Exam_submitted' in session and request.endpoint != 'Exam_results':
         # Clear session after viewing results, but not on the results page itself
         session.pop('answers', None)
         session.pop('flagged', None)
@@ -246,10 +248,10 @@ def manage_Exam_session():
 
 
 
-@app.route('/submit_Exam/<int:exam_id>', methods=['POST'])
+@app.route('/submit_Exam/<int:Exam_id>', methods=['POST'])
 @login_required
-def submit_Exam(exam_id):
-    Exam = Exam.query.get_or_404(exam_id)
+def submit_Exam(Exam_id):
+    Exam = Exam.query.get_or_404(Exam_id)
     user_id = current_user.id
 
     total_questions = len(Exam.questions)
@@ -260,9 +262,9 @@ def submit_Exam(exam_id):
 
     if 'answers' not in session:
         flash("There was an issue with your session data. Please try again.", "error")
-        return redirect(url_for('take_Exam', exam_id=exam_id))
+        return redirect(url_for('take_Exam', Exam_id=Exam_id))
 
-    Exam_result = ExamResult(user_id=user_id, exam_id=exam_id, score=0)
+    Exam_result = ExamResult(user_id=user_id, Exam_id=Exam_id, score=0)
     db.session.add(Exam_result)
     db.session.commit()
 
@@ -302,7 +304,7 @@ def submit_Exam(exam_id):
     db.session.commit()
 
     # Mark the Exam as no longer accessible
-    Exam_access = ExamAccess.query.filter_by(user_id=user_id, exam_id=exam_id).first()
+    Exam_access = ExamAccess.query.filter_by(user_id=user_id, Exam_id=Exam_id).first()
     if Exam_access:
         Exam_access.is_accessible = False
         db.session.commit()
@@ -324,15 +326,15 @@ def submit_Exam(exam_id):
 
 
 
-@app.route('/request_access/<int:exam_id>', methods=['POST'])
+@app.route('/request_access/<int:Exam_id>', methods=['POST'])
 @login_required
-def request_access(exam_id):
-    Exam = Exam.query.get_or_404(exam_id)
-    existing_request = ExamAccessRequest.query.filter_by(user_id=current_user.id, exam_id=exam_id, status='pending').first()
+def request_access(Exam_id):
+    Exam = Exam.query.get_or_404(Exam_id)
+    existing_request = ExamAccessRequest.query.filter_by(user_id=current_user.id, Exam_id=Exam_id, status='pending').first()
     if existing_request:
         flash('You have already requested access to this Exam.', 'info')
     else:
-        new_request = ExamAccessRequest(user_id=current_user.id, exam_id=exam_id)
+        new_request = ExamAccessRequest(user_id=current_user.id, Exam_id=Exam_id)
         db.session.add(new_request)
         db.session.commit()
         flash('Your access request has been submitted and is pending approval.', 'success')
@@ -360,11 +362,11 @@ def approve_access(request_id):
     access_request.status = 'approved'
     access_request.response_date = datetime.utcnow()
     
-    new_access = ExamAccess(user_id=access_request.user_id, exam_id=access_request.exam_id, is_accessible=True)
+    new_access = ExamAccess(user_id=access_request.user_id, Exam_id=access_request.Exam_id, is_accessible=True)
     db.session.add(new_access)
     db.session.commit()
 
-    flash(f'Access request for Exam "{access_request.exam.title}" by user "{access_request.user.username}" approved.', 'success')
+    flash(f'Access request for Exam "{access_request.Exam.title}" by user "{access_request.user.username}" approved.', 'success')
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/deny_access/<int:request_id>', methods=['POST'], endpoint='admin_deny_access')
@@ -380,7 +382,7 @@ def deny_access(request_id):
     access_request.admin_comment = request.form.get('admin_comment', '')
     db.session.commit()
 
-    flash(f'Access request for Exam "{access_request.exam.title}" by user "{access_request.user.username}" denied.', 'success')
+    flash(f'Access request for Exam "{access_request.Exam.title}" by user "{access_request.user.username}" denied.', 'success')
     return redirect(url_for('admin_dashboard'))
 
 
@@ -393,31 +395,31 @@ def grant_Exam_access(user_id):
         return redirect(url_for('home'))
 
     user = User.query.get_or_404(user_id)
-    exam_id = request.form['exam_id']
-    Exam = Exam.query.get_or_404(exam_id)
+    Exam_id = request.form['Exam_id']
+    Exam = Exam.query.get_or_404(Exam_id)
 
     # Check if the user already has access to the Exam
-    existing_access = ExamAccess.query.filter_by(user_id=user.id, exam_id=exam.id).first()
+    existing_access = ExamAccess.query.filter_by(user_id=user.id, Exam_id=Exam.id).first()
     if existing_access:
         flash(f'User "{user.username}" already has access to the Exam "{Exam.title}".', 'info')
     else:
         # Grant access to the Exam
-        new_access = ExamAccess(user_id=user.id, exam_id=exam.id, is_accessible=True)
+        new_access = ExamAccess(user_id=user.id, Exam_id=Exam.id, is_accessible=True)
         db.session.add(new_access)
         db.session.commit()
         flash(f'Access to Exam "{Exam.title}" has been granted to user "{user.username}".', 'success')
 
     return redirect(url_for('manage_users'))
 
-@app.route('/admin/manage_questions/<int:exam_id>', methods=['GET', 'POST'])
+@app.route('/admin/manage_questions/<int:Exam_id>', methods=['GET', 'POST'])
 @login_required
-def manage_questions(exam_id):
+def manage_questions(Exam_id):
     if not current_user.is_admin:
         flash('You do not have permission to access this page.', 'error')
         return redirect(url_for('home'))
 
-    Exam = Exam.query.get_or_404(exam_id)
-    questions = Question.query.filter_by(exam_id=exam.id).all()
+    Exam = Exam.query.get_or_404(Exam_id)
+    questions = Question.query.filter_by(Exam_id=Exam.id).all()
 
     if request.method == 'POST':
         question_type = request.form['question_type']
@@ -436,7 +438,7 @@ def manage_questions(exam_id):
                 option_c=option_c,
                 option_d=option_d,
                 correct_answer=correct_answer,
-                exam_id=exam.id
+                Exam_id=Exam.id
             )
         elif question_type == 'true_false':
             question = Question(
@@ -444,16 +446,16 @@ def manage_questions(exam_id):
                 option_a='True',
                 option_b='False',
                 correct_answer='A' if correct_answer.lower() == 'true' else 'B',
-                exam_id=exam.id
+                Exam_id=Exam.id
             )
         else:
             flash('Invalid question type.', 'error')
-            return redirect(url_for('manage_questions', exam_id=exam.id))
+            return redirect(url_for('manage_questions', Exam_id=Exam.id))
 
         db.session.add(question)
         db.session.commit()
         flash(f'Question added to Exam "{Exam.title}".', 'success')
-        return redirect(url_for('manage_questions', exam_id=exam.id))
+        return redirect(url_for('manage_questions', Exam_id=Exam.id))
 
     return render_template('manage_questions.html', Exam=Exam, questions=questions)
 
@@ -479,22 +481,22 @@ def deny_access(request_id):
 @login_required
 def user_dashboard():
     user_requests = ExamAccessRequest.query.filter_by(user_id=current_user.id).all()
-    exam_results = ExamResult.query.filter_by(user_id=current_user.id).all()
-    return render_template('user_dashboard.html', requests=user_requests, exam_results=exam_results)
+    Exam_results = ExamResult.query.filter_by(user_id=current_user.id).all()
+    return render_template('user_dashboard.html', requests=user_requests, Exam_results=Exam_results)
 
 
-@app.route('/exam_results/<int:Exam_result_id>', methods=['GET'])
+@app.route('/Exam_results/<int:Exam_result_id>', methods=['GET'])
 @login_required
-def exam_results(Exam_result_id):
+def Exam_results(Exam_result_id):
     Exam_result = ExamResult.query.get_or_404(Exam_result_id)
-    questions = Exam_result.exam.questions
+    questions = Exam_result.Exam.questions
     
     # Ensure the user has permission to view this result
     if not current_user.is_admin and Exam_result.user_id != current_user.id:
         flash('You do not have permission to view this Exam result.', 'error')
         return redirect(url_for('home'))
 
-    return render_template('exam_results.html', Exam_result=Exam_result, questions=questions)
+    return render_template('Exam_results.html', Exam_result=Exam_result, questions=questions)
 
 
 @app.route('/admin/dashboard')
@@ -609,12 +611,12 @@ def delete_question(question_id):
         return redirect(url_for('home'))
 
     question = Question.query.get_or_404(question_id)
-    exam_id = question.exam_id  # Store the Exam ID before deleting the question
+    Exam_id = question.Exam_id  # Store the Exam ID before deleting the question
     db.session.delete(question)
     db.session.commit()
 
     flash('Question deleted successfully.', 'success')
-    return redirect(url_for('manage_questions', exam_id=exam_id))
+    return redirect(url_for('manage_questions', Exam_id=Exam_id))
 
 
 @app.route('/admin/revoke_Exam_access/<int:user_id>', methods=['POST'])
@@ -625,15 +627,15 @@ def revoke_Exam_access(user_id):
         return redirect(url_for('home'))
 
     user = User.query.get_or_404(user_id)
-    exam_id = request.form['exam_id']
+    Exam_id = request.form['Exam_id']
     
     # Eager load the Exam relationship using joinedload
-    access = ExamAccess.query.options(joinedload(ExamAccess.exam)).filter_by(user_id=user.id, exam_id=exam_id).first()
+    access = ExamAccess.query.options(joinedload(ExamAccess.Exam)).filter_by(user_id=user.id, Exam_id=Exam_id).first()
 
     if access:
         db.session.delete(access)
         db.session.commit()
-        flash(f'Access to Exam "{access.exam.title}" has been revoked from user "{user.username}".', 'success')
+        flash(f'Access to Exam "{access.Exam.title}" has been revoked from user "{user.username}".', 'success')
     else:
         flash(f'User "{user.username}" does not have access to the selected Exam.', 'error')
 
@@ -644,7 +646,7 @@ def revoke_Exam_access(user_id):
 @login_required
 def view_completed_Exam(Exam_result_id):
     Exam_result = ExamResult.query.get_or_404(Exam_result_id)
-    questions = Exam_result.exam.questions
+    questions = Exam_result.Exam.questions
 
     # Ensure the user has permission to view this result
     if not current_user.is_admin and Exam_result.user_id != current_user.id:
@@ -663,10 +665,10 @@ def delete_completed_Exam(Exam_result_id):
         return redirect(url_for('home'))
 
     # Use joinedload to eagerly load the 'Exam' relationship
-    Exam_result = ExamResult.query.options(joinedload(ExamResult.exam), joinedload(ExamResult.user)).get_or_404(Exam_result_id)
+    Exam_result = ExamResult.query.options(joinedload(ExamResult.Exam), joinedload(ExamResult.user)).get_or_404(Exam_result_id)
 
     # Store information for the flash message before deleting
-    Exam_title = Exam_result.exam.title if Exam_result.exam else "Unknown Exam"
+    Exam_title = Exam_result.Exam.title if Exam_result.Exam else "Unknown Exam"
     username = Exam_result.user.username if Exam_result.user else "Unknown User"
 
     try:
@@ -728,26 +730,26 @@ def add_Exam_command(title):
     new_Exam = Exam(title=title)
     db.session.add(new_Exam)
     db.session.commit()
-    click.echo(f'Exam "{title}" added successfully with ID: {new_exam.id}')
+    click.echo(f'Exam "{title}" added successfully with ID: {new_Exam.id}')
 
 
-@app.route('/admin/edit_Exam/<int:exam_id>', methods=['GET', 'POST'])
+@app.route('/admin/edit_Exam/<int:Exam_id>', methods=['GET', 'POST'])
 @login_required
-def edit_Exam(exam_id):
+def edit_Exam(Exam_id):
     if not current_user.is_admin:
         flash('You do not have permission to access this page.', 'error')
         return redirect(url_for('home'))
 
-    Exam = Exam.query.get_or_404(exam_id)
+    Exam = Exam.query.get_or_404(Exam_id)
 
     if request.method == 'POST':
         title = request.form['title'].strip()
 
         # Check if a Exam with the new title already exists
         existing_Exam = Exam.query.filter_by(title=title).first()
-        if existing_Exam and existing_exam.id != exam_id:
+        if existing_Exam and existing_Exam.id != Exam_id:
             flash(f'A Exam with the title "{title}" already exists. Please choose a different title.', 'error')
-            return redirect(url_for('edit_Exam', exam_id=exam_id))
+            return redirect(url_for('edit_Exam', Exam_id=Exam_id))
 
         if title:
             Exam.title = title
@@ -770,8 +772,8 @@ def add_question():
     Exams = Exam.query.all()  # Get all available Exams
 
     if request.method == 'POST':
-        exam_id = request.form['exam_id']  # Get the selected Exam ID
-        Exam = Exam.query.get_or_404(exam_id)
+        Exam_id = request.form['Exam_id']  # Get the selected Exam ID
+        Exam = Exam.query.get_or_404(Exam_id)
 
         question_type = request.form['question_type']
         content = request.form['content']
@@ -789,7 +791,7 @@ def add_question():
                 option_c=option_c,
                 option_d=option_d,
                 correct_answer=correct_answer,
-                exam_id=exam.id
+                Exam_id=Exam.id
             )
         elif question_type == 'true_false':
             question = Question(
@@ -797,7 +799,7 @@ def add_question():
                 option_a='True',
                 option_b='False',
                 correct_answer='A' if correct_answer.lower() == 'true' else 'B',
-                exam_id=exam.id
+                Exam_id=Exam.id
             )
         else:
             flash('Invalid question type.', 'error')
@@ -823,8 +825,8 @@ def import_questions():
 
     if request.method == 'POST':
         file = request.files['file']
-        exam_id = request.form.get('exam_id')
-        Exam = Exam.query.get(exam_id)  # Fetch the Exam
+        Exam_id = request.form.get('Exam_id')
+        Exam = Exam.query.get(Exam_id)  # Fetch the Exam
 
         if not Exam:
             flash('Exam not found.', 'error')
@@ -865,7 +867,7 @@ def import_questions():
                     option_c=option_c,
                     option_d=option_d,
                     correct_answer=correct_answer,
-                    exam_id=exam.id  # Ensure this is set
+                    Exam_id=Exam.id  # Ensure this is set
                 )
                 db.session.add(question)
             except Exception as e:
@@ -875,7 +877,7 @@ def import_questions():
 
         db.session.commit()
         flash('Questions imported successfully!', 'success')
-        return redirect(url_for('manage_questions', exam_id=exam.id))
+        return redirect(url_for('manage_questions', Exam_id=Exam.id))
 
     return render_template('import_questions.html', Exams=Exams)
 
@@ -902,14 +904,14 @@ def admin_redirect():
         return redirect(url_for('home'))
 
 
-@app.route('/admin/delete_Exam/<int:exam_id>', methods=['POST'])
+@app.route('/admin/delete_Exam/<int:Exam_id>', methods=['POST'])
 @login_required
-def delete_Exam(exam_id):
+def delete_Exam(Exam_id):
     if not current_user.is_admin:
         flash('You do not have permission to perform this action.', 'error')
         return redirect(url_for('home'))
 
-    Exam = Exam.query.get_or_404(exam_id)
+    Exam = Exam.query.get_or_404(Exam_id)
 
     # Delete the Exam from the database
     db.session.delete(Exam)
@@ -920,15 +922,15 @@ def delete_Exam(exam_id):
 
 
 
-@app.route('/take_Exam/<int:exam_id>', methods=['GET', 'POST'])
+@app.route('/take_Exam/<int:Exam_id>', methods=['GET', 'POST'])
 @login_required
-def take_Exam(exam_id):
-    Exam_access = ExamAccess.query.filter_by(user_id=current_user.id, exam_id=exam_id).first()
+def take_Exam(Exam_id):
+    Exam_access = ExamAccess.query.filter_by(user_id=current_user.id, Exam_id=Exam_id).first()
     if not Exam_access or not Exam_access.is_accessible:
         flash('You do not have access to this Exam.', 'error')
         return redirect(url_for('home'))
 
-    Exam = Exam.query.get_or_404(exam_id)
+    Exam = Exam.query.get_or_404(Exam_id)
     total_questions = len(Exam.questions)
 
     # Initialize session data if not already present
@@ -961,7 +963,7 @@ def take_Exam(exam_id):
 
         elif action == 'submit_Exam':
             session.modified = True  # Ensure session is saved before redirect
-            return redirect(url_for('submit_Exam', exam_id=exam_id))
+            return redirect(url_for('submit_Exam', Exam_id=Exam_id))
 
         session.modified = True
 
@@ -993,10 +995,10 @@ def take_Exam(exam_id):
 
 
 
-@app.route('/request_retake/<int:exam_id>', methods=['POST'])
+@app.route('/request_retake/<int:Exam_id>', methods=['POST'])
 @login_required
-def request_retake(exam_id):
-    Exam_access = ExamAccess.query.filter_by(user_id=current_user.id, exam_id=exam_id).first()
+def request_retake(Exam_id):
+    Exam_access = ExamAccess.query.filter_by(user_id=current_user.id, Exam_id=Exam_id).first()
     if Exam_access:
         Exam_access.is_accessible = True
         db.session.commit()
@@ -1019,7 +1021,7 @@ def export_Exam_result(Exam_result_id):
     user_answers = {}
 
     # Fetch answers directly from session or another reliable source
-    for question in Exam_result.exam.questions:
+    for question in Exam_result.Exam.questions:
         missed_question = MissedQuestion.query.filter_by(Exam_result_id=Exam_result.id, question_id=question.id).first()
 
         if missed_question:
