@@ -9,7 +9,7 @@
             <select name="test_id" id="test_id" class="form-control" required>
                 <option value="" disabled selected>Select a test</option>
                 {% for test in tests %}
-                    <option value="{{ test.id }}">{{ test.title }}</option>
+                    <option value="{{ Exam.id }}">{{ Exam.title }}</option>
                 {% endfor %}
             </select>
         </div>

@@ -58,7 +58,7 @@ class Question(db.Model):
     def get_user_answer(self, test_result, user_answers=None):
         """
             Get the user's answer to this question.
-            :param test_result: The TestResult instance for this test.
+            :param test_result: The TestResult instance for this Exam.
             :param user_answers: A dictionary of user answers, if available.
             :return: The user's answer to this question.
             """

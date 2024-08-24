@@ -96,9 +96,9 @@
             {% for test in accessible_tests %}
             <div class="test-card accessible">
                 <div class="test-card-content">
-                    <h3>{{ test.title }}</h3>
-                    <p>You have access to this test.</p>
-                    <a href="{{ url_for('take_test', test_id=test.id) }}" class="btn btn-primary">Take Test</a>
+                    <h3>{{ Exam.title }}</h3>
+                    <p>You have access to this Exam.</p>
+                    <a href="{{ url_for('take_test', test_id=Exam.id) }}" class="btn btn-primary">Take Test</a>
                 </div>
             </div>
             {% endfor %}
@@ -107,9 +107,9 @@
                 {% for test in accessible_tests %}
                 <div class="test-card accessible">
                     <div class="test-card-content">
-                        <h3>{{ test.title }}</h3>
-                        <p>You have access to this test.</p>
-                        <a href="{{ url_for('take_test', test_id=test.id) }}" class="btn btn-primary">Take Test</a>
+                        <h3>{{ Exam.title }}</h3>
+                        <p>You have access to this Exam.</p>
+                        <a href="{{ url_for('take_test', test_id=Exam.id) }}" class="btn btn-primary">Take Test</a>
                     </div>
                 </div>
                 {% endfor %}
@@ -127,7 +127,7 @@
             {% for test in pending_tests %}
             <div class="test-card pending">
                 <div class="test-card-content">
-                    <h3>{{ test.title }}</h3>
+                    <h3>{{ Exam.title }}</h3>
                     <p style="color: rgb(175, 7, 7);">Your request to access this test is pending approval.</p>
                 </div>
             </div>
@@ -146,9 +146,9 @@
             {% for test in inaccessible_tests %}
             <div class="test-card inaccessible">
                 <div class="test-card-content">
-                    <h3>{{ test.title }}</h3>
-                    <p style="color:white;">You currently do not have access to this test.</p>
-                    <form method="POST" action="{{ url_for('request_access', test_id=test.id) }}">
+                    <h3>{{ Exam.title }}</h3>
+                    <p style="color:white;">You currently do not have access to this Exam.</p>
+                    <form method="POST" action="{{ url_for('request_access', test_id=Exam.id) }}">
                         <button type="submit" class="btn btn-secondary">Request Access</button>
                     </form>
                 </div>

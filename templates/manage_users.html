@@ -33,9 +33,9 @@
                     <form action="{{ url_for('grant_test_access', user_id=user.id) }}" method="POST" style="display: flex; align-items: center; margin-right: 10px; justify-content: space-evenly;">
                         <select name="test_id" class="form-control">
                             {% for test in tests %}
-                                {% set has_access = test.id in user.accesses|map(attribute='test_id')|list %}
-                                <option value="{{ test.id }}" {% if has_access %}disabled{% endif %}>
-                                    {{ test.title }} {% if has_access %}(Already has access){% endif %}
+                                {% set has_access = Exam.id in user.accesses|map(attribute='test_id')|list %}
+                                <option value="{{ Exam.id }}" {% if has_access %}disabled{% endif %}>
+                                    {{ Exam.title }} {% if has_access %}(Already has access){% endif %}
                                 </option>
                             {% endfor %}
                         </select>

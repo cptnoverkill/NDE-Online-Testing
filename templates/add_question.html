@@ -8,7 +8,7 @@
             <label for="exam._id">Select Test:</label>
             <select name="exam._id" id="exam._id" class="form-control" required>
                 {% for test in tests %}
-                    <option value="{{ exam.id }}">{{ test.title }}</option>
+                    <option value="{{ exam.id }}">{{ Exam.title }}</option>
                 {% endfor %}
             </select>
         </div>

@@ -7,10 +7,10 @@
         <ul style="list-style-type: none; padding: 0;">
             {% for test in tests %}
                 <li style="margin-bottom: 10px; display: flex; align-items: center; border-bottom: white solid 1px; max-width: 600px;">
-                    <a href="{{ url_for('manage_questions', test_id=test.id) }}" style="flex-grow: 1;">
-                        {{ test.title }}   <br> {{ test.questions }} in bank. <br> {{ test.questions_count }} questions in test.
+                    <a href="{{ url_for('manage_questions', test_id=Exam.id) }}" style="flex-grow: 1;">
+                        {{ Exam.title }}   <br> {{ Exam.questions }} in bank. <br> {{ Exam.questions_count }} questions in Exam.
                     </a>
-                    <form action="{{ url_for('delete_test', test_id=test.id) }}" method="POST" style="display:inline;">
+                    <form action="{{ url_for('delete_test', test_id=Exam.id) }}" method="POST" style="display:inline;">
                         <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this test?');">Delete</button>
                     </form>
                 </li>

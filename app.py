@@ -23,7 +23,7 @@ from models import db, User, Exam, Question, ExamAccess, ExamResult, MissedQuest
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///knowledge_test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///knowledge_Exam.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config.update(
@@ -104,7 +104,7 @@ admin.add_view(FileAdmin(path, '/static/', name='Static Files'))
 def home():
     if current_user.is_authenticated:
         if current_user.is_admin:
-            accessible_tests = Test.query.all()  # Admins see all tests
+            accessible_tests = Exam.query.all()  # Admins see all tests
             inaccessible_tests = []
             pending_tests = []
         else:
@@ -131,7 +131,7 @@ def home():
             all_pending_exam_ids = [exam.id for test in pending_tests]
             all_exam_ids = all_accessible_exam_ids + all_inaccessible_exam_ids + all_pending_exam_ids
 
-            unavailable_tests = Test.query.filter(~exam.id.in_(all_exam_ids)).all()
+            unavailable_tests = Exam.query.filter(~exam.id.in_(all_exam_ids)).all()
             inaccessible_tests.extend(unavailable_tests)
 
         # Ensure no duplicates
@@ -249,10 +249,10 @@ def manage_test_session():
 @app.route('/submit_test/<int:exam_id>', methods=['POST'])
 @login_required
 def submit_test(exam_id):
-    test = Test.query.get_or_404(exam_id)
+    test = Exam.query.get_or_404(exam_id)
     user_id = current_user.id
 
-    total_questions = len(test.questions)
+    total_questions = len(Exam.questions)
     correct_answers = 0
 
     # Debugging: Check the session data
@@ -266,7 +266,7 @@ def submit_test(exam_id):
     db.session.add(test_result)
     db.session.commit()
 
-    for question in test.questions:
+    for question in Exam.questions:
         question_id_str = str(question.id)
         user_answer = session['answers'].get(question_id_str)
 
@@ -327,10 +327,10 @@ def submit_test(exam_id):
 @app.route('/request_access/<int:exam_id>', methods=['POST'])
 @login_required
 def request_access(exam_id):
-    test = Test.query.get_or_404(exam_id)
+    test = Exam.query.get_or_404(exam_id)
     existing_request = TestAccessRequest.query.filter_by(user_id=current_user.id, exam_id=exam_id, status='pending').first()
     if existing_request:
-        flash('You have already requested access to this test.', 'info')
+        flash('You have already requested access to this Exam.', 'info')
     else:
         new_request = TestAccessRequest(user_id=current_user.id, exam_id=exam_id)
         db.session.add(new_request)
@@ -394,18 +394,18 @@ def grant_test_access(user_id):
 
     user = User.query.get_or_404(user_id)
     exam_id = request.form['exam_id']
-    test = Test.query.get_or_404(exam_id)
+    test = Exam.query.get_or_404(exam_id)
 
     # Check if the user already has access to the test
     existing_access = TestAccess.query.filter_by(user_id=user.id, exam_id=exam.id).first()
     if existing_access:
-        flash(f'User "{user.username}" already has access to the test "{test.title}".', 'info')
+        flash(f'User "{user.username}" already has access to the test "{Exam.title}".', 'info')
     else:
         # Grant access to the test
         new_access = TestAccess(user_id=user.id, exam_id=exam.id, is_accessible=True)
         db.session.add(new_access)
         db.session.commit()
-        flash(f'Access to test "{test.title}" has been granted to user "{user.username}".', 'success')
+        flash(f'Access to test "{Exam.title}" has been granted to user "{user.username}".', 'success')
 
     return redirect(url_for('manage_users'))
 
@@ -416,7 +416,7 @@ def manage_questions(exam_id):
         flash('You do not have permission to access this page.', 'error')
         return redirect(url_for('home'))
 
-    test = Test.query.get_or_404(exam_id)
+    test = Exam.query.get_or_404(exam_id)
     questions = Question.query.filter_by(exam_id=exam.id).all()
 
     if request.method == 'POST':
@@ -452,7 +452,7 @@ def manage_questions(exam_id):
 
         db.session.add(question)
         db.session.commit()
-        flash(f'Question added to test "{test.title}".', 'success')
+        flash(f'Question added to test "{Exam.title}".', 'success')
         return redirect(url_for('manage_questions', exam_id=exam.id))
 
     return render_template('manage_questions.html', test=test, questions=questions)
@@ -540,7 +540,7 @@ def manage_users():
             flash('Username and password are required.', 'error')
 
     users = User.query.all()  # Get all users
-    tests = Test.query.all()  # Get all tests
+    tests = Exam.query.all()  # Get all tests
 
     return render_template('manage_users.html', users=users, tests=tests)
 
@@ -586,7 +586,7 @@ def create_test():
         flash('Test created successfully!', 'success')
         return redirect(url_for('manage_tests'))
 
-    return render_template('create_test.html')
+    return render_template('create_Exam.html')
 
     
 
@@ -597,7 +597,7 @@ def manage_tests():
         flash('You do not have permission to access this page.', 'error')
         return redirect(url_for('home'))
 
-    tests = Test.query.all()  # Get all tests from the database
+    tests = Exam.query.all()  # Get all tests from the database
     return render_template('manage_tests.html', tests=tests)
 
 
@@ -635,7 +635,7 @@ def revoke_test_access(user_id):
         db.session.commit()
         flash(f'Access to test "{access.exam.title}" has been revoked from user "{user.username}".', 'success')
     else:
-        flash(f'User "{user.username}" does not have access to the selected test.', 'error')
+        flash(f'User "{user.username}" does not have access to the selected Exam.', 'error')
 
     return redirect(url_for('manage_users'))
 
@@ -651,7 +651,7 @@ def view_completed_test(test_result_id):
         flash('You do not have permission to view this test result.', 'error')
         return redirect(url_for('home'))
 
-    return render_template('view_completed_test.html', test_result=test_result, questions=questions)
+    return render_template('view_completed_Exam.html', test_result=test_result, questions=questions)
 
 
 
@@ -724,7 +724,7 @@ def list_users():
 @app.cli.command("add-test")
 @click.argument("title")
 def add_test_command(title):
-    """Add a new test."""
+    """Add a new Exam."""
     new_test = Test(title=title)
     db.session.add(new_test)
     db.session.commit()
@@ -738,26 +738,26 @@ def edit_test(exam_id):
         flash('You do not have permission to access this page.', 'error')
         return redirect(url_for('home'))
 
-    test = Test.query.get_or_404(exam_id)
+    test = Exam.query.get_or_404(exam_id)
 
     if request.method == 'POST':
         title = request.form['title'].strip()
 
         # Check if a test with the new title already exists
-        existing_test = Test.query.filter_by(title=title).first()
+        existing_test = Exam.query.filter_by(title=title).first()
         if existing_test and existing_exam.id != exam_id:
             flash(f'A test with the title "{title}" already exists. Please choose a different title.', 'error')
             return redirect(url_for('edit_test', exam_id=exam_id))
 
         if title:
-            test.title = title
+            Exam.title = title
             db.session.commit()
             flash(f'Test "{title}" has been updated successfully.', 'success')
             return redirect(url_for('manage_tests'))
         else:
-            flash('Title is required to update the test.', 'error')
+            flash('Title is required to update the Exam.', 'error')
 
-    return render_template('edit_test.html', test=test)
+    return render_template('edit_Exam.html', test=test)
 
 
 @app.route('/admin/add_question', methods=['GET', 'POST'])
@@ -767,11 +767,11 @@ def add_question():
         flash('You do not have permission to access this page.', 'error')
         return redirect(url_for('home'))
 
-    tests = Test.query.all()  # Get all available tests
+    tests = Exam.query.all()  # Get all available tests
 
     if request.method == 'POST':
         exam_id = request.form['exam_id']  # Get the selected test ID
-        test = Test.query.get_or_404(exam_id)
+        test = Exam.query.get_or_404(exam_id)
 
         question_type = request.form['question_type']
         content = request.form['content']
@@ -805,7 +805,7 @@ def add_question():
 
         db.session.add(question)
         db.session.commit()
-        flash(f'Question added to test "{test.title}".', 'success')
+        flash(f'Question added to test "{Exam.title}".', 'success')
         return redirect(url_for('add_question'))
 
     return render_template('add_question.html', tests=tests)
@@ -819,12 +819,12 @@ def import_questions():
         flash('You do not have permission to view this page.', 'error')
         return redirect(url_for('home'))
 
-    tests = Test.query.all()  # Fetch all tests from the database
+    tests = Exam.query.all()  # Fetch all tests from the database
 
     if request.method == 'POST':
         file = request.files['file']
         exam_id = request.form.get('exam_id')
-        test = Test.query.get(exam_id)  # Fetch the test
+        test = Exam.query.get(exam_id)  # Fetch the test
 
         if not test:
             flash('Test not found.', 'error')
@@ -889,7 +889,7 @@ def list_tests():
         flash('You do not have permission to view this page.', 'error')
         return redirect(url_for('home'))
 
-    tests = Test.query.all()
+    tests = Exam.query.all()
     return render_template('list_tests.html', tests=tests)
 
 @app.route('/admin/')
@@ -909,12 +909,12 @@ def delete_test(exam_id):
         flash('You do not have permission to perform this action.', 'error')
         return redirect(url_for('home'))
 
-    test = Test.query.get_or_404(exam_id)
+    test = Exam.query.get_or_404(exam_id)
 
     # Delete the test from the database
     db.session.delete(test)
     db.session.commit()
-    flash(f'Test "{test.title}" has been deleted successfully.', 'success')
+    flash(f'Test "{Exam.title}" has been deleted successfully.', 'success')
 
     return redirect(url_for('manage_tests'))
 
@@ -925,17 +925,17 @@ def delete_test(exam_id):
 def take_test(exam_id):
     test_access = TestAccess.query.filter_by(user_id=current_user.id, exam_id=exam_id).first()
     if not test_access or not test_access.is_accessible:
-        flash('You do not have access to this test.', 'error')
+        flash('You do not have access to this Exam.', 'error')
         return redirect(url_for('home'))
 
-    test = Test.query.get_or_404(exam_id)
-    total_questions = len(test.questions)
+    test = Exam.query.get_or_404(exam_id)
+    total_questions = len(Exam.questions)
 
     # Initialize session data if not already present
     if 'answers' not in session:
         session['answers'] = {}
     if 'flagged' not in session:
-        session['flagged'] = {str(q.id): False for q in test.questions}
+        session['flagged'] = {str(q.id): False for q in Exam.questions}
     if 'current_index' not in session:
         session['current_index'] = 0
     if 'start_time' not in session:
@@ -943,7 +943,7 @@ def take_test(exam_id):
 
     if request.method == 'POST':
         action = request.form.get('action')
-        current_question_id = str(test.questions[session['current_index']].id)
+        current_question_id = str(Exam.questions[session['current_index']].id)
 
         print(f"Before Processing: Current Index: {session['current_index']}, Answers: {session['answers']}")
 
@@ -967,14 +967,14 @@ def take_test(exam_id):
 
         print(f"After Processing: Current Index: {session['current_index']}, Answers: {session['answers']}")
 
-    current_question = test.questions[session['current_index']]
+    current_question = Exam.questions[session['current_index']]
     progress = sum(1 for answer in session['answers'].values() if answer)
-    flagged_questions = [i for i, q in enumerate(test.questions) if session['flagged'][str(q.id)]]
+    flagged_questions = [i for i, q in enumerate(Exam.questions) if session['flagged'][str(q.id)]]
     time_elapsed = (datetime.utcnow() - datetime.fromisoformat(session['start_time'])).total_seconds() / 60
 
     all_questions_answered = progress == total_questions
 
-    return render_template('take_test.html', 
+    return render_template('take_Exam.html', 
                            test=test,
                            current_question=current_question,
                            current_index=session['current_index'], 
@@ -1002,7 +1002,7 @@ def request_retake(exam_id):
         db.session.commit()
         flash('Retake request submitted successfully.', 'success')
     else:
-        flash('You do not have access to retake this test.', 'error')
+        flash('You do not have access to retake this Exam.', 'error')
     return redirect(url_for('home'))
 
 
