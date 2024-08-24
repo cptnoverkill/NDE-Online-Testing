@@ -21,7 +21,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(120), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
 
-    test_results = db.relationship('TestResult', back_populates='user', lazy=True)
+    exam_results = db.relationship('TestResult', back_populates='user', lazy=True)
     accesses = db.relationship('TestAccess', back_populates='user', lazy=True)
     access_requests = db.relationship('TestAccessRequest', back_populates='user', lazy=True)
 
@@ -32,7 +32,7 @@ class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     question_count = db.Column(db.Integer, nullable=False, default=10)
-    test_results = relationship('TestResult', back_populates='test', cascade='all, delete-orphan')
+    exam_results = relationship('TestResult', back_populates='test', cascade='all, delete-orphan')
     questions = relationship('Question', back_populates='test', cascade='all, delete-orphan')
     accesses = db.relationship('TestAccess', back_populates='test', lazy=True, cascade="all, delete-orphan")
     access_requests = db.relationship('TestAccessRequest', back_populates='test', lazy=True, cascade="all, delete-orphan")
@@ -101,8 +101,8 @@ class TestResult(db.Model):
         score = Column(Float, nullable=False)
         date_submitted = Column(DateTime, default=datetime.utcnow)
 
-        user = relationship('User', back_populates='test_results')
-        test = relationship('Test', back_populates='test_results')
+        user = relationship('User', back_populates='exam_results')
+        test = relationship('Test', back_populates='exam_results')
         missed_questions = relationship('MissedQuestion', back_populates='test_result', cascade='all, delete-orphan')
 
         def __init__(self, user_id, test_id, score):

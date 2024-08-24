@@ -235,7 +235,7 @@ def manage_test_session():
         session.pop('flagged', None)
         session.pop('current_index', None)
         session.pop('start_time', None)
-    elif 'test_submitted' in session and request.endpoint != 'test_results':
+    elif 'test_submitted' in session and request.endpoint != 'exam_results':
         # Clear session after viewing results, but not on the results page itself
         session.pop('answers', None)
         session.pop('flagged', None)
@@ -479,13 +479,13 @@ def deny_access(request_id):
 @login_required
 def user_dashboard():
     user_requests = TestAccessRequest.query.filter_by(user_id=current_user.id).all()
-    test_results = TestResult.query.filter_by(user_id=current_user.id).all()
-    return render_template('user_dashboard.html', requests=user_requests, test_results=test_results)
+    exam_results = TestResult.query.filter_by(user_id=current_user.id).all()
+    return render_template('user_dashboard.html', requests=user_requests, exam_results=exam_results)
 
 
-@app.route('/test_results/<int:test_result_id>', methods=['GET'])
+@app.route('/exam_results/<int:test_result_id>', methods=['GET'])
 @login_required
-def test_results(test_result_id):
+def exam_results(test_result_id):
     test_result = TestResult.query.get_or_404(test_result_id)
     questions = test_result.test.questions
     
@@ -494,7 +494,7 @@ def test_results(test_result_id):
         flash('You do not have permission to view this test result.', 'error')
         return redirect(url_for('home'))
 
-    return render_template('test_results.html', test_result=test_result, questions=questions)
+    return render_template('exam_results.html', test_result=test_result, questions=questions)
 
 
 @app.route('/admin/dashboard')

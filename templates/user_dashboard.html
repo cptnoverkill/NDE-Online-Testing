@@ -5,8 +5,8 @@
 
     <h2>Your Test Results</h2>
     <ul>
-        {% if test_results %}
-            {% for result in test_results %}
+        {% if exam_results %}
+            {% for result in exam_results %}
             <li>
                 <strong>{{ result.test.title }}</strong>: You scored {{ result.score }} out of {{ result.test.questions|length }}.
             </li>
