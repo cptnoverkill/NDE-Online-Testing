@@ -1,16 +1,16 @@
 <!-- create_Exam.html -->
 {% extends "base.html" %}
 {% block content %}
-    <h1>Create New Test</h1>
+    <h1>Create New Exam</h1>
     <form method="POST">
         <div class="form-group">
-            <label for="title">Test Title:</label>
+            <label for="title">Exam Title:</label>
             <input type="text" name="title" id="title" class="form-control" required>
         </div>
         <div class="form-group">
             <label for="question_count">Number of Questions:</label>
             <input style ="max-width: 100px;" type="number" name="question_count" id="question_count" class="form-control" required min="1" style = "background-color: black;">
         </div>
-        <button type="submit" class="btn btn-primary">Create Test</button>
+        <button type="submit" class="btn btn-primary">Create Exam</button>
     </form>
 {% endblock %}

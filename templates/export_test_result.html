@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Result Export</title>
+    <title>Exam Result Export</title>
     <style>
         /* Existing styles */
         body {
@@ -181,7 +181,7 @@
                 <p><strong>Author Name:</strong> Ken Criss</p>
             </div>
             <div>
-                <p><strong>Test Creation Date:</strong> 03/14/2017</p>
+                <p><strong>Exam Creation Date:</strong> 03/14/2017</p>
             </div>
         </div>
 
@@ -189,22 +189,22 @@
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
         </div>
 
-        <h1>{{ test_result.exam.title }} Results</h1>
+        <h1>{{ Exam_result.exam.title }} Results</h1>
 
         <div class="score-info">
-            <p><strong>Score:</strong> <span>{{ "%.2f"|format(test_result.score) }}%</span></p>
-            <p><strong>Total # of Questions:</strong> <span>{{ test_result.exam.questions|length }}</span></p>
+            <p><strong>Score:</strong> <span>{{ "%.2f"|format(Exam_result.score) }}%</span></p>
+            <p><strong>Total # of Questions:</strong> <span>{{ Exam_result.exam.questions|length }}</span></p>
         </div>
 
         <div class="signature-section">
             <div class="signature-fields">
-                <p><strong>Name:</strong> <span class="signature-line">{{ test_result.user.username }}</span></p>
+                <p><strong>Name:</strong> <span class="signature-line">{{ Exam_result.user.username }}</span></p>
                 <div class="signature-wrapper">
                     <strong>Signature:</strong>
                     <canvas id="signature-pad1" class="signature-pad"></canvas>
                     <button id="clear1" class="btn-clear">Clear</button>
                 </div>
-                <p><strong>Date:</strong> <span class="signature-line">{{ test_result.date_submitted.strftime('%Y-%m-%d') }}</span></p>
+                <p><strong>Date:</strong> <span class="signature-line">{{ Exam_result.date_submitted.strftime('%Y-%m-%d') }}</span></p>
             </div>
         </div>
 
@@ -220,8 +220,8 @@
         </div>
 
         <div class="footer">
-            <p>This test meets the required standards of ASNT SNT-TC-1A, CP-189 and Coast to Coast Practice for Qualification and Cretification of Nondestructive Testing Personnel.</p>
-            <p style ="font-style: italic; font-weight: bold;">Material in this test packet is considered confidential and is not to be shared with other employees.</p>
+            <p>This Exam meets the required standards of ASNT SNT-TC-1A, CP-189 and Coast to Coast Practice for Qualification and Cretification of Nondestructive Examing Personnel.</p>
+            <p style ="font-style: italic; font-weight: bold;">Material in this Exam packet is considered confidential and is not to be shared with other employees.</p>
         </div>
     </div>
 
@@ -236,7 +236,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for missed_question in test_result.missed_questions %}
+        {% for missed_question in Exam_result.missed_questions %}
             <tr>
                 <td>{{ missed_question.question.content }}</td>
                 <td>{{ missed_question.user_answer }}</td>
@@ -267,8 +267,8 @@
         </tr>
     </thead>
     <tbody>
-        {% for question in test_result.exam.questions %}
-            {% if question.id not in test_result.missed_questions | map(attribute='question_id') %}
+        {% for question in Exam_result.exam.questions %}
+            {% if question.id not in Exam_result.missed_questions | map(attribute='question_id') %}
                 <tr>
                     <td>{{ question.content }}</td>
  

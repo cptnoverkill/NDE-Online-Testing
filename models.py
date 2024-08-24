@@ -5,7 +5,7 @@ from flask_login import UserMixin, current_user
 import random
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, Float
-import pytest
+import pyExam
 
 db = SQLAlchemy()
 
@@ -21,19 +21,19 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(120), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
 
-    exam_results = db.relationship('TestResult', back_populates='user', lazy=True)
-    accesses = db.relationship('TestAccess', back_populates='user', lazy=True)
-    access_requests = db.relationship('TestAccessRequest', back_populates='user', lazy=True)
+    exam_results = db.relationship('ExamResult', back_populates='user', lazy=True)
+    accesses = db.relationship('ExamAccess', back_populates='user', lazy=True)
+    access_requests = db.relationship('ExamAccessRequest', back_populates='user', lazy=True)
 
-# Test model
+# Exam model
 class Exam(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     question_count = db.Column(db.Integer, nullable=False, default=10)
-    exam_results = relationship('ExamResult', back_populates='test', cascade='all, delete-orphan')
-    questions = relationship('Question', back_populates='test', cascade='all, delete-orphan')
-    accesses = db.relationship('ExamAccess', back_populates='test', lazy=True, cascade="all, delete-orphan")
-    access_requests = db.relationship('ExamAccessRequest', back_populates='test', lazy=True, cascade="all, delete-orphan")
+    exam_results = relationship('ExamResult', back_populates='Exam', cascade='all, delete-orphan')
+    questions = relationship('Question', back_populates='Exam', cascade='all, delete-orphan')
+    accesses = db.relationship('ExamAccess', back_populates='Exam', lazy=True, cascade="all, delete-orphan")
+    access_requests = db.relationship('ExamAccessRequest', back_populates='Exam', lazy=True, cascade="all, delete-orphan")
    
     def get_random_questions(self):
         """Get a random subset of questions based on question_count."""
@@ -52,18 +52,18 @@ class Question(db.Model):
     correct_answer = db.Column(db.String(1), nullable=False)
     exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)
 
-    exam = db.relationship('Test', back_populates='questions')
+    exam = db.relationship('Exam', back_populates='questions')
     missed_questions = db.relationship('MissedQuestion', back_populates='question', lazy=True)
 
-    def get_user_answer(self, test_result, user_answers=None):
+    def get_user_answer(self, Exam_result, user_answers=None):
         """
             Get the user's answer to this question.
-            :param test_result: The TestResult instance for this Exam.
+            :param Exam_result: The ExamResult instance for this Exam.
             :param user_answers: A dictionary of user answers, if available.
             :return: The user's answer to this question.
             """
             # Check if the question was missed
-        missed_question = MissedQuestion.query.filter_by(test_result_id=test_result.id, question_id=self.id).first()
+        missed_question = MissedQuestion.query.filter_by(Exam_result_id=Exam_result.id, question_id=self.id).first()
         if missed_question:
                 return missed_question.user_answer  # Return the user's incorrect answer
             
@@ -76,7 +76,7 @@ class Question(db.Model):
 
 
 
-# TestAccess model
+# ExamAccess model
 class ExamAccess(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
@@ -85,9 +85,9 @@ class ExamAccess(db.Model):
     attempts = db.Column(db.Integer, default=0)
 
     user = db.relationship('User', back_populates='accesses')
-    test = db.relationship('Test', back_populates='accesses')
+    Exam = db.relationship('Exam', back_populates='accesses')
 
-# TestResult model
+# ExamResult model
 class ExamResult(db.Model):
         id = Column(Integer, primary_key=True)
         user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
@@ -96,15 +96,15 @@ class ExamResult(db.Model):
         date_submitted = Column(DateTime, default=datetime.utcnow)
 
         user = relationship('User', back_populates='exam_results')
-        test = relationship('Test', back_populates='exam_results')
-        missed_questions = relationship('MissedQuestion', back_populates='test_result', cascade='all, delete-orphan')
+        Exam = relationship('Exam', back_populates='exam_results')
+        missed_questions = relationship('MissedQuestion', back_populates='Exam_result', cascade='all, delete-orphan')
 
         def __init__(self, user_id, exam_id, score):
             self.user_id = user_id
             self.exam_id = exam_id
             self.score = score
 
-# TestAccessRequest model
+# ExamAccessRequest model
 class ExamAccessRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
@@ -115,14 +115,14 @@ class ExamAccessRequest(db.Model):
     admin_comment = db.Column(db.String(500))
 
     user = db.relationship('User', back_populates='access_requests')
-    test = db.relationship('Test', back_populates='access_requests')
+    Exam = db.relationship('Exam', back_populates='access_requests')
 
 # MissedQuestion model
 class MissedQuestion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    test_result_id = db.Column(db.Integer, db.ForeignKey('test_result.id'), nullable=False)
+    Exam_result_id = db.Column(db.Integer, db.ForeignKey('Exam_result.id'), nullable=False)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     user_answer = db.Column(db.String(200), nullable=False)
 
-    test_result = db.relationship('TestResult', back_populates='missed_questions')
+    Exam_result = db.relationship('ExamResult', back_populates='missed_questions')
     question = db.relationship('Question', back_populates='missed_questions')

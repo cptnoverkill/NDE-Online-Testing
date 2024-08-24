@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>Completed Test: {{ test_result.exam.title }}</h1>
-    <p><strong>User:</strong> {{ test_result.user.username }}</p>
-    <p><strong>Score:</strong> {{ test_result.score }} out of {{ test_result.exam.questions|length }}</p>
-    <p><strong>Date Submitted:</strong> {{ test_result.date_submitted.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+    <h1>Completed Exam: {{ Exam_result.exam.title }}</h1>
+    <p><strong>User:</strong> {{ Exam_result.user.username }}</p>
+    <p><strong>Score:</strong> {{ Exam_result.score }} out of {{ Exam_result.exam.questions|length }}</p>
+    <p><strong>Date Submitted:</strong> {{ Exam_result.date_submitted.strftime('%Y-%m-%d %H:%M:%S') }}</p>
 
     <h2>Questions</h2>
     <ul>
@@ -16,10 +16,10 @@
                     {% if question.option_c %}<li>C: {{ question.option_c }}</li>{% endif %}
                     {% if question.option_d %}<li>D: {{ question.option_d }}</li>{% endif %}
                 </ul>
-                <p><strong>Your Answer:</strong> {{ test_result.answers|selectattr("question_id", "equalto", question.id)|first.user_answer }}</p>
+                <p><strong>Your Answer:</strong> {{ Exam_result.answers|selectattr("question_id", "equalto", question.id)|first.user_answer }}</p>
             </li>
         {% endfor %}
     </ul>
 
-    <a href="{{ url_for('generate_pdf', result_id=test_result.id) }}" class="btn btn-primary">Print as PDF</a>
+    <a href="{{ url_for('generate_pdf', result_id=Exam_result.id) }}" class="btn btn-primary">Print as PDF</a>
 {% endblock %}

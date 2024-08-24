@@ -3,7 +3,7 @@
 {% block content %}
     <h1>{{ current_user.username }}'s Dashboard</h1>
 
-    <h2>Your Test Results</h2>
+    <h2>Your Exam Results</h2>
     <ul>
         {% if exam_results %}
             {% for result in exam_results %}
@@ -12,7 +12,7 @@
             </li>
             {% endfor %}
         {% else %}
-            <p>No test results available.</p>
+            <p>No Exam results available.</p>
         {% endif %}
     </ul>
 
@@ -21,7 +21,7 @@
         {% if requests %}
             {% for request in requests %}
             <li>
-                Test: <strong>{{ request.exam.title }}</strong> - Status: {{ request.status }}
+                Exam: <strong>{{ request.exam.title }}</strong> - Status: {{ request.status }}
             </li>
             {% endfor %}
         {% else %}

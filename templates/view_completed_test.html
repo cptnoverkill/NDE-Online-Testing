@@ -1,10 +1,10 @@
-<!-- view_test_results -->
+<!-- view_Exam_results -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Result Export</title>
+    <title>Exam Result Export</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -77,10 +77,10 @@
     <div class="container">
         <div class="header">
             <div>
-                <p><strong>Name:</strong> {{ test_result.user.username }}</p>
+                <p><strong>Name:</strong> {{ Exam_result.user.username }}</p>
             </div>
             <div>
-                <p><strong>Date:</strong> {{ test_result.date_submitted.strftime('%Y-%m-%d') }}</p>
+                <p><strong>Date:</strong> {{ Exam_result.date_submitted.strftime('%Y-%m-%d') }}</p>
             </div>
         </div>
 
@@ -88,22 +88,22 @@
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
         </div>
 
-        <h1>{{ test_result.exam.title }} Results</h1>
+        <h1>{{ Exam_result.exam.title }} Results</h1>
 
         <div class="score-info">
-            <p><strong>Score:</strong> <span class="signature-line">{{ "%.2f"|format(test_result.score) }}%</span></p>
-            <p><strong>Total # of Questions:</strong> <span class="signature-line">{{ test_result.exam.questions|length }}</span></p>
+            <p><strong>Score:</strong> <span class="signature-line">{{ "%.2f"|format(Exam_result.score) }}%</span></p>
+            <p><strong>Total # of Questions:</strong> <span class="signature-line">{{ Exam_result.exam.questions|length }}</span></p>
         </div>
 
         <div class="signature-section">
-            <p><strong>Name:</strong> <span class="signature-line">{{ test_result.user.username }}</span></p>
+            <p><strong>Name:</strong> <span class="signature-line">{{ Exam_result.user.username }}</span></p>
             <p><strong>Signature:</strong> <span class="signature-line"></span></p>
-            <p><strong>Date:</strong> <span class="signature-line">{{ test_result.date_submitted.strftime('%Y-%m-%d') }}</span></p>
+            <p><strong>Date:</strong> <span class="signature-line">{{ Exam_result.date_submitted.strftime('%Y-%m-%d') }}</span></p>
         </div>
 
         <div class="footer">
-            <p>Proctor: {{ test_result.proctor_name }} | ASNT NDT Level III</p>
-            <p>This test meets the required standards...</p>
+            <p>Proctor: {{ Exam_result.proctor_name }} | ASNT NDT Level III</p>
+            <p>This Exam meets the required standards...</p>
             <p>General Exam | Page 1 of 1</p>
         </div>
     </div>
@@ -118,7 +118,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for missed_question in test_result.missed_questions %}
+            {% for missed_question in Exam_result.missed_questions %}
             <tr>
                 <tr>
                     

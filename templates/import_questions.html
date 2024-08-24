@@ -5,10 +5,10 @@
 
     <form action="{{ url_for('import_questions') }}" method="POST" enctype="multipart/form-data">
         <div class="form-group">
-            <label for="test_id">Select Test:</label>
-            <select name="test_id" id="test_id" class="form-control" required>
-                <option value="" disabled selected>Select a test</option>
-                {% for test in tests %}
+            <label for="Exam_id">Select Exam:</label>
+            <select name="Exam_id" id="Exam_id" class="form-control" required>
+                <option value="" disabled selected>Select a Exam</option>
+                {% for Exam in Exams %}
                     <option value="{{ Exam.id }}">{{ Exam.title }}</option>
                 {% endfor %}
             </select>
@@ -20,5 +20,5 @@
         <button type="submit" class="btn btn-primary">Import Questions</button>
     </form>
 
-    <a href="{{ url_for('manage_tests') }}" class="btn btn-secondary" style="margin-top: 20px;">Back to Manage Tests</a>
+    <a href="{{ url_for('manage_Exams') }}" class="btn btn-secondary" style="margin-top: 20px;">Back to Manage Exams</a>
 {% endblock %}

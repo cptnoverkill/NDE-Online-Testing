@@ -1,15 +1,15 @@
 <!-- edit_Exam.html -->
 {% extends "base.html" %}
 {% block content %}
-    <h1>Edit Test</h1>
+    <h1>Edit Exam</h1>
 
     <form method="POST">
         <div class="form-group">
-            <label for="title">Test Title:</label>
+            <label for="title">Exam Title:</label>
             <input type="text" name="title" id="title" class="form-control" value="{{ Exam.title }}" required>
         </div>
 
-        <button type="submit" class="btn btn-primary">Update Test</button>
-        <a href="{{ url_for('manage_tests') }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Update Exam</button>
+        <a href="{{ url_for('manage_Exams') }}" class="btn btn-secondary">Cancel</a>
     </form>
 {% endblock %}

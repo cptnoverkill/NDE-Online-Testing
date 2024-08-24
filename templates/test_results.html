@@ -1,6 +1,6 @@
-<!-- test_results.html -->
+<!-- Exam_results.html -->
 {% extends "base.html" %}
-{% block title %}Test Result{% endblock %}
+{% block title %}Exam Result{% endblock %}
 {% block content %}
 <style>
     .report-header {
@@ -43,21 +43,21 @@
 </style>
 
 <div class="report-header">
-    <h1>Test Results</h1>
-    <h2>{{ test_result.exam.title }}</h2>
+    <h1>Exam Results</h1>
+    <h2>{{ Exam_result.exam.title }}</h2>
 </div>
 
 <div class="report-section">
-    <h3>Test Details</h3>
-    <p><strong>Score:</strong> {{ "%.2f"|format(test_result.score) }}%</p>
-    <p><strong>Date Submitted:</strong> {{ format_pacific_time(test_result.date_submitted) }}</p>
+    <h3>Exam Details</h3>
+    <p><strong>Score:</strong> {{ "%.2f"|format(Exam_result.score) }}%</p>
+    <p><strong>Date Submitted:</strong> {{ format_pacific_time(Exam_result.date_submitted) }}</p>
 </div>
 
 <div class="report-section">
     <h3>Answer Summary</h3>
-    {% for question in test_result.exam.questions %}
+    {% for question in Exam_result.exam.questions %}
         <p><strong>Question {{ loop.index }}:</strong> {{ question.content }}</p>
-        <p><strong>Your Answer:</strong> {{ question.get_user_answer(test_result.user_id) }}</p>
+        <p><strong>Your Answer:</strong> {{ question.get_user_answer(Exam_result.user_id) }}</p>
         <p><strong>Correct Answer:</strong> {{ question.correct_answer }}</p>
         <hr>
     {% endfor %}

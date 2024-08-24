@@ -30,10 +30,10 @@
             {% for user in users %}
                 <li style="margin-bottom: 60px; display: flex; align-items: center; border-bottom: white solid 1px; max-width: 800px; justify-content: space-evenly;">
                     <span style="flex-grow: 1;">{{ user.username }} {% if user.is_admin %}(Admin){% endif %}</span>
-                    <form action="{{ url_for('grant_test_access', user_id=user.id) }}" method="POST" style="display: flex; align-items: center; margin-right: 10px; justify-content: space-evenly;">
-                        <select name="test_id" class="form-control">
-                            {% for test in tests %}
-                                {% set has_access = Exam.id in user.accesses|map(attribute='test_id')|list %}
+                    <form action="{{ url_for('grant_Exam_access', user_id=user.id) }}" method="POST" style="display: flex; align-items: center; margin-right: 10px; justify-content: space-evenly;">
+                        <select name="Exam_id" class="form-control">
+                            {% for Exam in Exams %}
+                                {% set has_access = Exam.id in user.accesses|map(attribute='Exam_id')|list %}
                                 <option value="{{ Exam.id }}" {% if has_access %}disabled{% endif %}>
                                     {{ Exam.title }} {% if has_access %}(Already has access){% endif %}
                                 </option>
@@ -43,8 +43,8 @@
                     </form>
 
                     <!-- Revoke access -->
-                    <form action="{{ url_for('revoke_test_access', user_id=user.id) }}" method="POST" style="display: flex; align-items: center;">
-                        <select name="test_id" class="form-control" style="margin-right: 10px;">
+                    <form action="{{ url_for('revoke_Exam_access', user_id=user.id) }}" method="POST" style="display: flex; align-items: center;">
+                        <select name="Exam_id" class="form-control" style="margin-right: 10px;">
                             {% for access in user.accesses %}
                                 <option value="{{ access.exam.id }}">{{ access.exam.title }}</option>
                             {% endfor %}

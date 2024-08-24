@@ -2,7 +2,7 @@
 {% block title %}Home{% endblock %}
 {% block content %}
 {% if current_user.is_authenticated %}
-    <h1>Your Tests</h1>
+    <h1>Your Exams</h1>
 
     <style>
         .exam-list {
@@ -60,10 +60,10 @@
         p {
             color: black;
         }
-        .taken-test-list {
+        .taken-Exam-list {
             margin-top: 20px;
         }
-        .taken-test-item {
+        .taken-Exam-item {
             background-color: #f1f1f1;
             padding: 10px;
             margin-bottom: 10px;
@@ -71,64 +71,64 @@
         }
     </style>
 
-    <!-- Previously Taken Tests Section -->
-    <div class="taken-test-list" style="max-width: 400px;">
-        {% if taken_tests %}
-            <h2>Previously Taken Tests</h2>
-            {% for test_result in taken_tests %}
-                <div class="taken-test-item">
-                    <h3 style="color: black;">{{ test_result.exam.title }}</h3>
-                    <p><strong>Score:</strong> {{ "%.2f"|format(test_result.score) }}% </p>
-                    <p><strong>Total Questions:</strong> {{ test_result.exam.questions|length }} </p>
-                    <p><strong>Date Taken:</strong> {{ format_pacific_time(test_result.date_submitted) }}</p>
+    <!-- Previously Taken Exams Section -->
+    <div class="taken-Exam-list" style="max-width: 400px;">
+        {% if taken_Exams %}
+            <h2>Previously Taken Exams</h2>
+            {% for Exam_result in taken_Exams %}
+                <div class="taken-Exam-item">
+                    <h3 style="color: black;">{{ Exam_result.exam.title }}</h3>
+                    <p><strong>Score:</strong> {{ "%.2f"|format(Exam_result.score) }}% </p>
+                    <p><strong>Total Questions:</strong> {{ Exam_result.exam.questions|length }} </p>
+                    <p><strong>Date Taken:</strong> {{ format_pacific_time(Exam_result.date_submitted) }}</p>
                     
                 </div>
             {% endfor %}
         {% else %}
-            <p style="color: lightgray;">You haven't completed any tests yet.</p>
+            <p style="color: lightgray;">You haven't completed any Exams yet.</p>
         {% endif %}
     </div>
 
-    <!-- Accessible Tests Section -->
-    <h2>Your Accessible Tests</h2>
-    <div class="test-list">
+    <!-- Accessible Exams Section -->
+    <h2>Your Accessible Exams</h2>
+    <div class="Exam-list">
         {% if current_user.is_admin %}
-            {% for test in accessible_tests %}
-            <div class="test-card accessible">
-                <div class="test-card-content">
+            {% for Exam in accessible_Exams %}
+            <div class="Exam-card accessible">
+                <div class="Exam-card-content">
                     <h3>{{ Exam.title }}</h3>
                     <p>You have access to this Exam.</p>
-                    <a href="{{ url_for('take_test', test_id=Exam.id) }}" class="btn btn-primary">Take Test</a>
+                    <a href="{{ url_for('take_Exam', Exam_id=Exam.id) }}" class="btn btn-primary">Take Exam</a>
                 </div>
             </div>
             {% endfor %}
         {% else %}
-            {% if accessible_tests %}
-                {% for test in accessible_tests %}
-                <div class="test-card accessible">
-                    <div class="test-card-content">
+            {% if accessible_Exams %}
+                {% for Exam in accessible_Exams %}
+                <div class="Exam-card accessible">
+                    <div class="Exam-card-content">
                         <h3>{{ Exam.title }}</h3>
                         <p>You have access to this Exam.</p>
-                        <a href="{{ url_for('take_test', test_id=Exam.id) }}" class="btn btn-primary">Take Test</a>
+                        <a href="{{ url_for('take_Exam', Exam_id=Exam.id) }}" class="btn btn-primary">Take Exam</a>
                     </div>
                 </div>
                 {% endfor %}
             {% else %}
-                <p style="color: lightgray;">No accessible tests available.</p>
+                <p style="color: lightgray;">No accessible Exams available.</p>
             {% endif %}
         {% endif %}
     </div>
 
-    <!-- Pending Approval Tests Section -->
+    <!-- Pending Approval Exams Section -->
     {% if not current_user.is_admin %}
-    <h2>Tests Pending Approval</h2>
-    <div class="test-list">
-        {% if pending_tests %}
-            {% for test in pending_tests %}
-            <div class="test-card pending">
-                <div class="test-card-content">
+    <h2>Exams Pending Approval</h2>
+    <div class="Exam-list">
+        {% if pending_Exams %}
+            {% for Exam in pending_Exams %}
+            <div class="Exam-card pending">
+                <div class="Exam-card-content">
                     <h3>{{ Exam.title }}</h3>
-                    <p style="color: rgb(175, 7, 7);">Your request to access this test is pending approval.</p>
+                    <p style="color: rgb(175, 7, 7);">Your request to access this Exam is pending approval.</p>
                 </div>
             </div>
             {% endfor %}
@@ -138,24 +138,24 @@
     </div>
     {% endif %}
 
-    <!-- Inaccessible Tests Section -->
+    <!-- Inaccessible Exams Section -->
     {% if not current_user.is_admin %}
-    <h2>Request Access to Other Tests</h2>
-    <div class="test-list">
-        {% if inaccessible_tests %}
-            {% for test in inaccessible_tests %}
-            <div class="test-card inaccessible">
-                <div class="test-card-content">
+    <h2>Request Access to Other Exams</h2>
+    <div class="Exam-list">
+        {% if inaccessible_Exams %}
+            {% for Exam in inaccessible_Exams %}
+            <div class="Exam-card inaccessible">
+                <div class="Exam-card-content">
                     <h3>{{ Exam.title }}</h3>
                     <p style="color:white;">You currently do not have access to this Exam.</p>
-                    <form method="POST" action="{{ url_for('request_access', test_id=Exam.id) }}">
+                    <form method="POST" action="{{ url_for('request_access', Exam_id=Exam.id) }}">
                         <button type="submit" class="btn btn-secondary">Request Access</button>
                     </form>
                 </div>
             </div>
             {% endfor %}
         {% else %}
-            <p style="color:lightgray;">No other tests available.</p>
+            <p style="color:lightgray;">No other Exams available.</p>
         {% endif %}
     </div>
     {% endif %}

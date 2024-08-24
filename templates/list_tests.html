@@ -1,11 +1,11 @@
-<!-- templates/list_tests.html -->
+<!-- templates/list_Exams.html -->
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
 {% block content %}
-<h2>Available Tests</h2>
+<h2>Available Exams</h2>
 <ul>
-    {% for test in tests %}
-    <li>Test ID: {{ Exam.id }}, Title: {{ Exam.title }}</li>
+    {% for Exam in Exams %}
+    <li>Exam ID: {{ Exam.id }}, Title: {{ Exam.title }}</li>
     {% endfor %}
 </ul>
 {% endblock %}

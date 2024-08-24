@@ -3,9 +3,9 @@
 {% block content %}
 <h2>Create a New Exam</h2>
 <form method="POST">
-    <label for="title">Test Title</label>
+    <label for="title">Exam Title</label>
     <input type="text" name="title" id="title" required>
-    <button type="submit">Create Test</button>
+    <button type="submit">Create Exam</button>
 </form>
 <a href="{{ url_for('admin.index') }}">Back to Admin Dashboard</a>
 {% endblock %}
