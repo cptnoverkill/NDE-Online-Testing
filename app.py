@@ -89,10 +89,10 @@ admin = Admin(app, name='Knowledge Test Admin', template_mode='bootstrap3')
 
 # Add model views
 admin.add_view(SecureModelView(User, db.session))
-admin.add_view(SecureModelView(Test, db.session))
+admin.add_view(SecureModelView(Exam, db.session))
 admin.add_view(SecureModelView(Question, db.session))
-admin.add_view(SecureModelView(TestAccess, db.session))  # Assuming SecureModelView is used instead of TestAccessModelView
-admin.add_view(SecureModelView(TestResult, db.session))
+admin.add_view(SecureModelView(ExamAccess, db.session))  # Assuming SecureModelView is used instead of TestAccessModelView
+admin.add_view(SecureModelView(ExamResult, db.session))
 admin.add_view(SecureModelView(MissedQuestion, db.session))
 
 # Add file admin
