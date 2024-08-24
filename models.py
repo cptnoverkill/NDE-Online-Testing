@@ -5,6 +5,7 @@ from flask_login import UserMixin, current_user
 import random
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, Float
+import pytest
 
 db = SQLAlchemy()
 
@@ -25,6 +26,7 @@ class User(UserMixin, db.Model):
     access_requests = db.relationship('TestAccessRequest', back_populates='user', lazy=True)
 
 # Test model
+@pytest.mark.skip(reason="This is a model, not a test case")
 class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -76,6 +78,7 @@ class Question(db.Model):
 
 
 # TestAccess model
+@pytest.mark.skip(reason="This is a model, not a test case")
 class TestAccess(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
@@ -87,6 +90,7 @@ class TestAccess(db.Model):
     test = db.relationship('Test', back_populates='accesses')
 
 # TestResult model
+@pytest.mark.skip(reason="This is a model, not a test case")
 class TestResult(db.Model):
         id = Column(Integer, primary_key=True)
         user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
@@ -104,6 +108,7 @@ class TestResult(db.Model):
             self.score = score
 
 # TestAccessRequest model
+@pytest.mark.skip(reason="This is a model, not a test case")
 class TestAccessRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
