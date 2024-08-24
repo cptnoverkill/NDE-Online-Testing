@@ -27,6 +27,7 @@ class User(UserMixin, db.Model):
 
 # Exam model
 class Exam(db.Model):
+    __tablename__ = 'exam'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     question_count = db.Column(db.Integer, nullable=False, default=10)
@@ -43,6 +44,7 @@ class Exam(db.Model):
 
 # Question model
 class Question(db.Model):
+    __tablename__ = 'question'
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(500), nullable=False)
     option_a = db.Column(db.String(200), nullable=False)
