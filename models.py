@@ -28,6 +28,7 @@ class User(UserMixin, db.Model):
 # Test model
 @pytest.mark.skip(reason="This is a model, not a test case")
 class Test(db.Model):
+    __test__ = False
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     question_count = db.Column(db.Integer, nullable=False, default=10)
@@ -80,6 +81,7 @@ class Question(db.Model):
 # TestAccess model
 @pytest.mark.skip(reason="This is a model, not a test case")
 class TestAccess(db.Model):
+    __test__ = False
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     test_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
@@ -92,6 +94,7 @@ class TestAccess(db.Model):
 # TestResult model
 @pytest.mark.skip(reason="This is a model, not a test case")
 class TestResult(db.Model):
+        __test__ = False
         id = Column(Integer, primary_key=True)
         user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
         test_id = Column(Integer, ForeignKey('test.id', ondelete='CASCADE'), nullable=False)
@@ -110,6 +113,7 @@ class TestResult(db.Model):
 # TestAccessRequest model
 @pytest.mark.skip(reason="This is a model, not a test case")
 class TestAccessRequest(db.Model):
+    __test__ = False
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     test_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
