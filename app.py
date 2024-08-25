@@ -927,30 +927,38 @@ def delete_exam(exam_id):
 
 
 
+from datetime import datetime
+
 @app.route('/take_exam/<int:exam_id>', methods=['GET', 'POST'])
 @login_required
 def take_exam(exam_id):
     exam_access = ExamAccess.query.filter_by(user_id=current_user.id, exam_id=exam_id).first()
     if not exam_access or not exam_access.is_accessible:
-        flash('You do not have access to this Exam.', 'error')
+        flash('You do not have access to this exam.', 'error')
         return redirect(url_for('home'))
 
     exam = Exam.query.get_or_404(exam_id)
-    randomized_questions = exam.get_random_questions()
-    total_questions = len(randomized_questions)
+    total_questions = len(exam.questions)
 
     # Initialize session data if not already present
     if 'answers' not in session:
         session['answers'] = {}
-    # Since flagged is not used, we do not initialize or process it
+    if 'flagged' not in session:
+        session['flagged'] = {str(q.id): False for q in exam.questions}
     if 'current_index' not in session:
         session['current_index'] = 0
     if 'start_time' not in session:
         session['start_time'] = datetime.utcnow().isoformat()
 
+    # Ensure current_index is within bounds
+    current_index = session.get('current_index', 0)
+    if current_index >= total_questions:
+        current_index = total_questions - 1
+    session['current_index'] = current_index
+
     if request.method == 'POST':
         action = request.form.get('action')
-        current_question_id = str(randomized_questions[session['current_index']].id)
+        current_question_id = str(exam.questions[session['current_index']].id)
 
         if action == 'submit_answer':
             answer = request.form.get('answer')
@@ -959,14 +967,20 @@ def take_exam(exam_id):
                 session['current_index'] = (session['current_index'] + 1) % total_questions
                 flash('Answer saved', 'success')
 
+        elif action == 'flag':
+            session['flagged'][current_question_id] = not session['flagged'][current_question_id]
+            flag_status = 'flagged' if session['flagged'][current_question_id] else 'unflagged'
+            flash(f'Question {flag_status}', 'info')
+
         elif action == 'submit_exam':
             session.modified = True  # Ensure session is saved before redirect
             return redirect(url_for('submit_exam', exam_id=exam_id))
 
         session.modified = True
 
-    current_question = randomized_questions[session['current_index']]
+    current_question = exam.questions[session['current_index']]
     progress = sum(1 for answer in session['answers'].values() if answer)
+    flagged_questions = [i for i, q in enumerate(exam.questions) if session['flagged'][str(q.id)]]
     time_elapsed = (datetime.utcnow() - datetime.fromisoformat(session['start_time'])).total_seconds() / 60
 
     all_questions_answered = progress == total_questions
@@ -976,10 +990,14 @@ def take_exam(exam_id):
                            current_question=current_question,
                            current_index=session['current_index'], 
                            progress=progress,
-                           total_questions=total_questions,
+                           total_questions=total_questions, 
+                           flagged_questions=flagged_questions,
                            time_elapsed=time_elapsed, 
                            answers=session['answers'],
+                           flagged=session['flagged'],
                            all_questions_answered=all_questions_answered)
+
+
 
 
 

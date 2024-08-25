@@ -41,12 +41,6 @@
             </div>
             <div class="action-buttons">
                 <button type="submit" class="btn btn-primary" id="saveAndContinue">Save Answer and Continue</button>
-                <!-- Only show the flag button if `flagged` is defined -->
-                {% if flagged is defined %}
-                    <button type="button" class="btn btn-secondary" id="flagButton">
-                        {% if flagged[current_question.id|string] %}Unflag{% else %}Flag{% endif %} for Review
-                    </button>
-                {% endif %}
             </div>
         </form>
     </div>
@@ -55,18 +49,6 @@
     {% if all_questions_answered %}
     <div class="submit-section">
         <h3>All questions answered!</h3>
-        {% if flagged_questions %}
-            <h4>Flagged Questions:</h4>
-            <ul>
-                {% for index in flagged_questions %}
-                    <li>
-                        <a href="{{ url_for('take_exam', exam_id=exam.id, question_index=index) }}">
-                            Question {{ index + 1 }}
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
         <form method="POST" action="{{ url_for('submit_exam', exam_id=exam.id) }}">
             <input type="hidden" name="action" value="submit_exam">
             <button type="submit" class="btn btn-success">Submit Exam</button>
@@ -76,11 +58,7 @@
     
     <div class="info-card">
         <div class="info-title">Exam Information</div>
-        <div class="info-item">Time Elapsed: {{ "%0.2f"|format(time_elapsed) }} minutes</div>
         <div class="info-item">Questions Answered: {{ progress }} / {{ total_questions }}</div>
-        {% if flagged is defined %}
-            <div class="info-item">Flagged Questions: {{ flagged_questions|length }}</div>
-        {% endif %}
     </div>
 </div>
 

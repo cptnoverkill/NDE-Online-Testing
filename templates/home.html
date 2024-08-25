@@ -2,9 +2,16 @@
 {% block title %}Home{% endblock %}
 {% block content %}
 {% if current_user.is_authenticated %}
-    <h1>Your exams</h1>
+    <h1>Your Exams</h1>
 
     <style>
+        h1 {
+
+            text-decoration: underline;
+        }
+        
+
+        
         .exam-list {
             display: flex;
             flex-wrap: wrap;
@@ -90,7 +97,7 @@
     </div>
 
     <!-- Accessible exams Section -->
-    <h2>Your Accessible exams</h2>
+    <h2>Your Accessible Exams</h2>
     <div class="exam-list">
         {% if current_user.is_admin %}
             {% for exam in accessible_exams %}
@@ -140,7 +147,7 @@
 
     <!-- Inaccessible exams Section -->
     {% if not current_user.is_admin %}
-    <h2>Request Access to Other exams</h2>
+    <h2>Request Access to Other Exams</h2>
     <div class="exam-list">
         {% if inaccessible_exams %}
             {% for exam in inaccessible_exams %}
