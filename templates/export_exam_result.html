@@ -172,6 +172,45 @@
                 margin-top: 20px;
             }
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .modal-content input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -198,13 +237,13 @@
 
         <div class="signature-section">
             <div class="signature-fields">
-                <p><strong>Name:</strong> <span class="signature-line">{{ exam_result.user.username }}</span></p>
+                <p><strong>Name:</strong> <span id="acknowledged-name" class="signature-line">{{ exam_result.user.username }}</span></p>
                 <div class="signature-wrapper">
                     <strong>Signature:</strong>
                     <canvas id="signature-pad1" class="signature-pad"></canvas>
                     <button id="clear1" class="btn-clear">Clear</button>
                 </div>
-                <p><strong>Date:</strong> <span class="signature-line">{{ exam_result.date_submitted.strftime('%Y-%m-%d') }}</span></p>
+                <p><strong>Date:</strong> <span class="signature-line">{{ exam_result.date_submitted.strftime('%m-%d-%Y') }}</span></p>
             </div>
         </div>
 
@@ -227,74 +266,80 @@
 
     <div class="questions-section">
         <h2>Missed Questions</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Question</th>
-            <th>Your Answer</th>
-            <th>Correct Answer</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for missed_question in exam_result.missed_questions %}
-            <tr>
-                <td>{{ missed_question.question.content }}</td>
-                <td>{{ missed_question.user_answer }}</td>
-                <td>
-                    {{ missed_question.question.correct_answer }},
-                    {% if missed_question.question.correct_answer == 'A' %}
-                        {{ missed_question.question.option_a }}
-                    {% elif missed_question.question.correct_answer == 'B' %}
-                        {{ missed_question.question.option_b }}
-                    {% elif missed_question.question.correct_answer == 'C' %}
-                        {{ missed_question.question.option_c }}
-                    {% elif missed_question.question.correct_answer == 'D' %}
-                        {{ missed_question.question.option_d }}
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<h2>Correctly Answered Questions</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Question</th>
-          
-            <th>Your Answer / Correct Answer</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for question in exam_result.exam.questions %}
-            {% if question.id not in exam_result.missed_questions | map(attribute='question_id') %}
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ question.content }}</td>
- 
-                    <td>
-                        {{ question.correct_answer }},
-                        {% if question.correct_answer == 'A' %}
-                            {{ question.option_a }}
-                        {% elif question.correct_answer == 'B' %}
-                            {{ question.option_b }}
-                        {% elif question.correct_answer == 'C' %}
-                            {{ question.option_c }}
-                        {% elif question.correct_answer == 'D' %}
-                            {{ question.option_d }}
-                        {% endif %}
-                    </td>
+                    <th>Question</th>
+                    <th>Your Answer</th>
+                    <th>Correct Answer</th>
                 </tr>
-            {% endif %}
-        {% endfor %}
-    </tbody>
-</table>
+            </thead>
+            <tbody>
+                {% for missed_question in exam_result.missed_questions %}
+                    <tr>
+                        <td>{{ missed_question.question.content }}</td>
+                        <td>{{ missed_question.user_answer }}</td>
+                        <td>
+                            {{ missed_question.question.correct_answer }},
+                            {% if missed_question.question.correct_answer == 'A' %}
+                                {{ missed_question.question.option_a }}
+                            {% elif missed_question.question.correct_answer == 'B' %}
+                                {{ missed_question.question.option_b }}
+                            {% elif missed_question.question.correct_answer == 'C' %}
+                                {{ missed_question.question.option_c }}
+                            {% elif missed_question.question.correct_answer == 'D' %}
+                                {{ missed_question.question.option_d }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-        
+        <h2>Correctly Answered Questions</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Your Answer / Correct Answer</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in exam_result.exam.questions %}
+                    {% if question.id not in exam_result.missed_questions | map(attribute='question_id') %}
+                        <tr>
+                            <td>{{ question.content }}</td>
+                            <td>
+                                {{ question.correct_answer }},
+                                {% if question.correct_answer == 'A' %}
+                                    {{ question.option_a }}
+                                {% elif question.correct_answer == 'B' %}
+                                    {{ question.option_b }}
+                                {% elif question.correct_answer == 'C' %}
+                                    {{ question.option_c }}
+                                {% elif question.correct_answer == 'D' %}
+                                    {{ question.option_d }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for name acknowledgment -->
+    <div id="acknowledgeModal" class="modal">
+        <div class="modal-content">
+            <h3>The examinee must enter name, acknowledging the test results. Then signatures of examinee and proctor are required:</h3>
+            <input type="text" id="acknowledgeName" placeholder="Enter your name">
+            <button id="submitAcknowledge">Submit</button>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js"></script>
     <script>
+        // Initialize the signature pads
         var canvas1 = document.getElementById('signature-pad1');
         var signaturePad1 = new SignaturePad(canvas1);
 
@@ -307,6 +352,25 @@
 
         document.getElementById('clear2').addEventListener('click', function () {
             signaturePad2.clear();
+        });
+
+        // Display the modal when the page loads
+        window.onload = function() {
+            document.getElementById('acknowledgeModal').style.display = 'flex';
+        }
+
+        // Handle the submission of the name acknowledgment
+        document.getElementById('submitAcknowledge').addEventListener('click', function() {
+            const name = document.getElementById('acknowledgeName').value.trim();
+            if (name) {
+                // Replace the username placeholder with the entered name
+                document.getElementById('acknowledged-name').textContent = name;
+
+                // Close the modal
+                document.getElementById('acknowledgeModal').style.display = 'none';
+            } else {
+                alert('Please enter your name.');
+            }
         });
     </script>
 </body>
