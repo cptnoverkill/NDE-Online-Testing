@@ -1,5 +1,5 @@
 name: CI
-ci:
+CI:
   skip: true
 
 on:
