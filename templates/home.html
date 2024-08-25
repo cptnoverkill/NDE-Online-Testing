@@ -10,7 +10,12 @@
             text-decoration: underline;
         }
         
-
+        body {
+        background-image: url('{{ url_for('static', filename='images/background_image.jpg') }}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        }
         
         .exam-list {
             display: flex;
