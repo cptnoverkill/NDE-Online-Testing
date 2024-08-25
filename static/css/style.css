@@ -35,7 +35,11 @@
   nav ul {
     display: flex;
     justify-content: center;
+    align-items: center; /* This will vertically center the text */
+    height: 100%; /* Ensure the height is set to 100% to match the nav bar's height */
     list-style-type: none;
+    margin: 0;
+    padding: 0;
   }
   
   nav ul li {
