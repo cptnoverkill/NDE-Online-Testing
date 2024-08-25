@@ -273,32 +273,34 @@ def submit_exam(exam_id):
         question_id_str = str(question.id)
         user_answer = session['answers'].get(question_id_str)
 
-        # Determine the correct answer content
-        if question.correct_answer in ['A', 'B', 'C', 'D']:
-            correct_answer_content = getattr(question, f"option_{question.correct_answer.lower()}")
-        else:
-            correct_answer_content = question.correct_answer
+        # Only process the user's answer if it's not None
+        if user_answer is not None:
+            # Determine the correct answer content
+            if question.correct_answer in ['A', 'B', 'C', 'D']:
+                correct_answer_content = getattr(question, f"option_{question.correct_answer.lower()}")
+            else:
+                correct_answer_content = question.correct_answer
 
-        # Normalize both contents to lowercase and strip any whitespace
-        correct_answer_content = correct_answer_content.strip().lower()
-        user_answer_content = None
-        
-        # Determine the user's answer content
-        if user_answer in ['A', 'B', 'C', 'D']:
-            user_answer_content = getattr(question, f"option_{user_answer.lower()}", user_answer).strip().lower()
-        else:
-            user_answer_content = user_answer.strip().lower()
+            # Normalize both contents to lowercase and strip any whitespace
+            correct_answer_content = correct_answer_content.strip().lower()
+            user_answer_content = None
+            
+            # Determine the user's answer content
+            if user_answer in ['A', 'B', 'C', 'D']:
+                user_answer_content = getattr(question, f"option_{user_answer.lower()}", user_answer).strip().lower()
+            else:
+                user_answer_content = user_answer.strip().lower()
 
-        # Compare user's answer content with the correct answer content
-        if user_answer_content == correct_answer_content:
-            correct_answers += 1
-        else:
-            missed_question = MissedQuestion(
-                exam_result_id=exam_result.id,
-                question_id=question.id,
-                user_answer=user_answer_content
-            )
-            db.session.add(missed_question)
+            # Compare user's answer content with the correct answer content
+            if user_answer_content == correct_answer_content:
+                correct_answers += 1
+            else:
+                missed_question = MissedQuestion(
+                    exam_result_id=exam_result.id,
+                    question_id=question.id,
+                    user_answer=user_answer_content
+                )
+                db.session.add(missed_question)
 
     score = (correct_answers / total_questions) * 100
     exam_result.score = score
@@ -320,6 +322,7 @@ def submit_exam(exam_id):
 
     flash(f'You scored {score:.2f}%.', 'success')
     return redirect(url_for('home'))
+
 
 
 
@@ -575,6 +578,7 @@ def create_exam():
     if request.method == 'POST':
         title = request.form['title']
         question_count = request.form.get('question_count')
+
 
         if question_count is None:
             flash('Please provide the number of questions.', 'error')
@@ -932,13 +936,13 @@ def take_exam(exam_id):
         return redirect(url_for('home'))
 
     exam = Exam.query.get_or_404(exam_id)
-    total_questions = len(exam.questions)
+    randomized_questions = exam.get_random_questions()
+    total_questions = len(randomized_questions)
 
     # Initialize session data if not already present
     if 'answers' not in session:
         session['answers'] = {}
-    if 'flagged' not in session:
-        session['flagged'] = {str(q.id): False for q in exam.questions}
+    # Since flagged is not used, we do not initialize or process it
     if 'current_index' not in session:
         session['current_index'] = 0
     if 'start_time' not in session:
@@ -946,9 +950,7 @@ def take_exam(exam_id):
 
     if request.method == 'POST':
         action = request.form.get('action')
-        current_question_id = str(exam.questions[session['current_index']].id)
-
-        print(f"Before Processing: Current Index: {session['current_index']}, Answers: {session['answers']}")
+        current_question_id = str(randomized_questions[session['current_index']].id)
 
         if action == 'submit_answer':
             answer = request.form.get('answer')
@@ -957,22 +959,14 @@ def take_exam(exam_id):
                 session['current_index'] = (session['current_index'] + 1) % total_questions
                 flash('Answer saved', 'success')
 
-        elif action == 'flag':
-            session['flagged'][current_question_id] = not session['flagged'][current_question_id]
-            flag_status = 'flagged' if session['flagged'][current_question_id] else 'unflagged'
-            flash(f'Question {flag_status}', 'info')
-
         elif action == 'submit_exam':
             session.modified = True  # Ensure session is saved before redirect
             return redirect(url_for('submit_exam', exam_id=exam_id))
 
         session.modified = True
 
-        print(f"After Processing: Current Index: {session['current_index']}, Answers: {session['answers']}")
-
-    current_question = exam.questions[session['current_index']]
+    current_question = randomized_questions[session['current_index']]
     progress = sum(1 for answer in session['answers'].values() if answer)
-    flagged_questions = [i for i, q in enumerate(exam.questions) if session['flagged'][str(q.id)]]
     time_elapsed = (datetime.utcnow() - datetime.fromisoformat(session['start_time'])).total_seconds() / 60
 
     all_questions_answered = progress == total_questions
@@ -982,14 +976,10 @@ def take_exam(exam_id):
                            current_question=current_question,
                            current_index=session['current_index'], 
                            progress=progress,
-                           total_questions=total_questions, 
-                           flagged_questions=flagged_questions,
+                           total_questions=total_questions,
                            time_elapsed=time_elapsed, 
                            answers=session['answers'],
-                           flagged=session['flagged'],
                            all_questions_answered=all_questions_answered)
-
-
 
 
 

@@ -3,9 +3,8 @@
 {% block content %}
 <div class="exam-container">
     <h1 class="exam-title">{{ exam.title }}</h1>
-    
+
     <!-- Debug Information
-    
     <div style="background-color: #ffcccc; padding: 10px; margin-bottom: 20px;">
         <h3>Debug Info:</h3>
         <p>Progress: {{ progress }} / {{ total_questions }}</p>
@@ -14,7 +13,6 @@
         <p>Answers: {{ answers }}</p>
     </div> -->
     
-
     <div class="progress-container">
         <div class="progress-bar">
             <div class="progress" style="width: {{ (progress / total_questions) * 100 }}%;"></div>
@@ -43,9 +41,12 @@
             </div>
             <div class="action-buttons">
                 <button type="submit" class="btn btn-primary" id="saveAndContinue">Save Answer and Continue</button>
-<!--                <button type="button" class="btn btn-secondary" id="flagButton"> 
-                    {% if flagged[current_question.id|string] %}Unflag{% else %}Flag{% endif %} for Review 
-                </button> -->
+                <!-- Only show the flag button if `flagged` is defined -->
+                {% if flagged is defined %}
+                    <button type="button" class="btn btn-secondary" id="flagButton">
+                        {% if flagged[current_question.id|string] %}Unflag{% else %}Flag{% endif %} for Review
+                    </button>
+                {% endif %}
             </div>
         </form>
     </div>
@@ -59,7 +60,7 @@
             <ul>
                 {% for index in flagged_questions %}
                     <li>
-                        <a href="{{ url_for('take_Exam', Exam_id=Exam.id, question_index=index) }}">
+                        <a href="{{ url_for('take_exam', exam_id=exam.id, question_index=index) }}">
                             Question {{ index + 1 }}
                         </a>
                     </li>
@@ -77,7 +78,9 @@
         <div class="info-title">Exam Information</div>
         <div class="info-item">Time Elapsed: {{ "%0.2f"|format(time_elapsed) }} minutes</div>
         <div class="info-item">Questions Answered: {{ progress }} / {{ total_questions }}</div>
-        <div class="info-item">Flagged Questions: {{ flagged_questions|length }}</div>
+        {% if flagged is defined %}
+            <div class="info-item">Flagged Questions: {{ flagged_questions|length }}</div>
+        {% endif %}
     </div>
 </div>
 
@@ -157,7 +160,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const options = document.querySelectorAll('.option');
-    const flagButton = document.getElementById('flagButton');
     const selectedAnswerInput = document.getElementById('selectedAnswer');
     const answerForm = document.getElementById('answerForm');
 
