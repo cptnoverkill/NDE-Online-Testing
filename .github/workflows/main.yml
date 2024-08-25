@@ -1,6 +1,6 @@
-name: CI
-CI:
-  skip: true
+#name: CI
+#CI:
+#  skip: true
 
 on:
   push:
