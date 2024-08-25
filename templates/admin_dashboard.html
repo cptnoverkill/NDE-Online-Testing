@@ -56,7 +56,7 @@
                         <p><strong>Completed on:</strong> {{ exam_result.date_submitted.strftime('%Y-%m-%d %H:%M:%S') }}</p>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-                        <a href="{{ url_for('view_completed_exam', exam_result_id=exam_result.id) }}" class="btn btn-info btn-sm">View Details</a>
+                        <!--<a href="{{ url_for('view_completed_exam', exam_result_id=exam_result.id) }}" class="btn btn-info btn-sm">View Details</a> -->
                         <form action="{{ url_for('export_exam_result', exam_result_id=exam_result.id) }}" method="GET" style="display:inline;">
                             <button type="submit" class="btn btn-secondary btn-sm">Export and PDF</button>
                         </form>
