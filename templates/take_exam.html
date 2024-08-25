@@ -4,22 +4,27 @@
 <div class="exam-container">
     <h1 class="exam-title">{{ exam.title }}</h1>
     
-    <!-- Debug Information -->
+    <!-- Debug Information
+    
     <div style="background-color: #ffcccc; padding: 10px; margin-bottom: 20px;">
         <h3>Debug Info:</h3>
         <p>Progress: {{ progress }} / {{ total_questions }}</p>
         <p>All Questions Answered: {{ all_questions_answered }}</p>
         <p>Current Index: {{ current_index }}</p>
         <p>Answers: {{ answers }}</p>
-    </div>
+    </div> -->
+    
 
     <div class="progress-container">
         <div class="progress-bar">
             <div class="progress" style="width: {{ (progress / total_questions) * 100 }}%;"></div>
         </div>
+        {% if not all_questions_answered %}
         <div class="progress-text">Question {{ current_index + 1 }} of {{ total_questions }}</div>
+        {% endif %}
     </div>
-    
+
+    {% if not all_questions_answered %}
     <div class="question-card">
         <div class="question-number">Question {{ current_index + 1 }}</div>
         <div class="question-text">{{ current_question.content }}</div>
@@ -44,6 +49,7 @@
             </div>
         </form>
     </div>
+    {% endif %}
     
     {% if all_questions_answered %}
     <div class="submit-section">
@@ -172,7 +178,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-
 </script>
 {% endblock %}
