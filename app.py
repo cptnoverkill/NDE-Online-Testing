@@ -235,13 +235,11 @@ def manage_exam_session():
     if 'start_new_exam' in request.args:
         # Clear session when starting a new Exam
         session.pop('answers', None)
-        session.pop('flagged', None)
         session.pop('current_index', None)
         session.pop('start_time', None)
     elif 'exam_submitted' in session and request.endpoint != 'exam_results':
         # Clear session after viewing results, but not on the results page itself
         session.pop('answers', None)
-        session.pop('flagged', None)
         session.pop('current_index', None)
         session.pop('start_time', None)
         session.pop('exam_submitted', None)
@@ -933,8 +931,6 @@ def take_exam(exam_id):
     # Initialize session data if not already present
     if 'answers' not in session:
         session['answers'] = {}
-    if 'flagged' not in session:
-        session['flagged'] = {str(q.id): False for q in exam.questions}
     if 'current_index' not in session:
         session['current_index'] = 0
     if 'start_time' not in session:
@@ -956,12 +952,6 @@ def take_exam(exam_id):
                 session['answers'][current_question_id] = answer
                 session['current_index'] = (session['current_index'] + 1) % total_questions
                 flash('Answer saved', 'success')
-
-        elif action == 'flag':
-            session['flagged'][current_question_id] = not session['flagged'][current_question_id]
-            flag_status = 'flagged' if session['flagged'][current_question_id] else 'unflagged'
-            flash(f'Question {flag_status}', 'info')
-
         elif action == 'submit_exam':
             session.modified = True  # Ensure session is saved before redirect
             return redirect(url_for('submit_exam', exam_id=exam_id))
@@ -970,7 +960,6 @@ def take_exam(exam_id):
 
     current_question = exam.questions[session['current_index']]
     progress = sum(1 for answer in session['answers'].values() if answer)
-    flagged_questions = [i for i, q in enumerate(exam.questions) if session['flagged'][str(q.id)]]
     time_elapsed = (datetime.utcnow() - datetime.fromisoformat(session['start_time'])).total_seconds() / 60
 
     all_questions_answered = progress == total_questions
@@ -981,10 +970,7 @@ def take_exam(exam_id):
                            current_index=session['current_index'], 
                            progress=progress,
                            total_questions=total_questions, 
-                           flagged_questions=flagged_questions,
-                           time_elapsed=time_elapsed, 
                            answers=session['answers'],
-                           flagged=session['flagged'],
                            all_questions_answered=all_questions_answered)
 
 
