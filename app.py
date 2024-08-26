@@ -926,7 +926,8 @@ def take_exam(exam_id):
         return redirect(url_for('home'))
 
     exam = Exam.query.get_or_404(exam_id)
-    total_questions = len(exam.questions)
+    question_count = exam.question_count  # Number of questions to pull
+    total_questions = min(question_count, len(exam.questions))  # Ensure you don't exceed the available questions
 
     # Initialize session data if not already present
     if 'answers' not in session:
@@ -935,6 +936,10 @@ def take_exam(exam_id):
         session['current_index'] = 0
     if 'start_time' not in session:
         session['start_time'] = datetime.utcnow().isoformat()
+    if 'randomized_questions' not in session:
+        # Randomly select questions when starting the exam
+        selected_questions = random.sample(exam.questions, total_questions)
+        session['randomized_questions'] = [q.id for q in selected_questions]
 
     # Ensure current_index is within bounds
     current_index = session.get('current_index', 0)
@@ -944,7 +949,7 @@ def take_exam(exam_id):
 
     if request.method == 'POST':
         action = request.form.get('action')
-        current_question_id = str(exam.questions[session['current_index']].id)
+        current_question_id = str(session['randomized_questions'][session['current_index']])
 
         if action == 'submit_answer':
             answer = request.form.get('answer')
@@ -958,7 +963,10 @@ def take_exam(exam_id):
 
         session.modified = True
 
-    current_question = exam.questions[session['current_index']]
+    # Retrieve the current question based on the randomized question IDs
+    current_question_id = session['randomized_questions'][session['current_index']]
+    current_question = Question.query.get(current_question_id)
+
     progress = sum(1 for answer in session['answers'].values() if answer)
     time_elapsed = (datetime.utcnow() - datetime.fromisoformat(session['start_time'])).total_seconds() / 60
 

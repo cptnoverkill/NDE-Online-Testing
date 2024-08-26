@@ -15,10 +15,10 @@
     
     <div class="progress-container">
         <div class="progress-bar">
-            <div class="progress" style="width: {{ (progress / total_questions) * 100 }}%;"></div>
+            <div class="progress" style="width: {{ (progress / question_count) * 100 }}%;"></div>
         </div>
         {% if not all_questions_answered %}
-        <div class="progress-text">Question {{ current_index + 1 }} of {{ total_questions }}</div>
+        <div class="progress-text">Question {{ current_index + 1 }} of {{ question_count }}</div>
         {% endif %}
     </div>
 
@@ -58,7 +58,7 @@
     
     <div class="info-card">
         <div class="info-title">Exam Information</div>
-        <div class="info-item">Questions Answered: {{ progress }} / {{ total_questions }}</div>
+        <div class="info-item">Questions Answered: {{ progress }} / {{ question_count }}</div>
     </div>
 </div>
 
