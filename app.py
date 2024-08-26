@@ -977,9 +977,10 @@ def take_exam(exam_id):
                            current_question=current_question,
                            current_index=session['current_index'], 
                            progress=progress,
-                           total_questions=total_questions, 
+                           question_count=question_count,  # Pass the correct question count
                            answers=session['answers'],
                            all_questions_answered=all_questions_answered)
+
 
 
 @app.route('/request_retake/<int:exam_id>', methods=['POST'])
