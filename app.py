@@ -258,9 +258,6 @@ def submit_exam(exam_id):
     total_questions = len(exam.questions)
     correct_answers = 0
 
-    # Debugging: Check the session data
-    print("Session data before processing:", session.get('answers'))
-
     if 'answers' not in session:
         flash("There was an issue with your session data. Please try again.", "error")
         return redirect(url_for('take_exam', exam_id=exam_id))
@@ -273,25 +270,15 @@ def submit_exam(exam_id):
         question_id_str = str(question.id)
         user_answer = session['answers'].get(question_id_str)
 
-        # Only process the user's answer if it's not None
         if user_answer is not None:
-            # Determine the correct answer content
             if question.correct_answer in ['A', 'B', 'C', 'D']:
                 correct_answer_content = getattr(question, f"option_{question.correct_answer.lower()}")
             else:
                 correct_answer_content = question.correct_answer
 
-            # Normalize both contents to lowercase and strip any whitespace
             correct_answer_content = correct_answer_content.strip().lower()
-            user_answer_content = None
-            
-            # Determine the user's answer content
-            if user_answer in ['A', 'B', 'C', 'D']:
-                user_answer_content = getattr(question, f"option_{user_answer.lower()}", user_answer).strip().lower()
-            else:
-                user_answer_content = user_answer.strip().lower()
+            user_answer_content = getattr(question, f"option_{user_answer.lower()}", user_answer).strip().lower()
 
-            # Compare user's answer content with the correct answer content
             if user_answer_content == correct_answer_content:
                 correct_answers += 1
             else:
@@ -306,24 +293,15 @@ def submit_exam(exam_id):
     exam_result.score = score
     db.session.commit()
 
-    # Mark the Exam as no longer accessible
     exam_access = ExamAccess.query.filter_by(user_id=user_id, exam_id=exam_id).first()
     if exam_access:
         exam_access.is_accessible = False
         db.session.commit()
 
-    # Clear session data after submission
-    session.pop('answers', None)
-    session.pop('flagged', None)
-    session.pop('skipped', None)
-    session.pop('current_index', None)
-    session.pop('start_time', None)
-    session.pop('taking_exam', None)
+    session.clear()  # Clear all session data after submission
 
     flash(f'You scored {score:.2f}%.', 'success')
     return redirect(url_for('home'))
-
-
 
 
 
@@ -941,8 +919,6 @@ def delete_exam(exam_id):
 
 
 
-from datetime import datetime
-
 @app.route('/take_exam/<int:exam_id>', methods=['GET', 'POST'])
 @login_required
 def take_exam(exam_id):
@@ -953,11 +929,6 @@ def take_exam(exam_id):
 
     exam = Exam.query.get_or_404(exam_id)
     total_questions = len(exam.questions)
-
-    if exam_access:
-        exam_access.user_id = user_id  # Ensure user_id is not None
-    else:
-        flash("User not found.", "error")
 
     # Initialize session data if not already present
     if 'answers' not in session:
@@ -1015,12 +986,6 @@ def take_exam(exam_id):
                            answers=session['answers'],
                            flagged=session['flagged'],
                            all_questions_answered=all_questions_answered)
-
-
-
-
-
-
 
 
 @app.route('/request_retake/<int:exam_id>', methods=['POST'])
