@@ -373,6 +373,12 @@ def approve_access(request_id):
     flash(f'Access request for Exam "{access_request.exam.title}" by user "{access_request.user.username}" approved.', 'success')
     return redirect(url_for('admin_dashboard'))
 
+    if exam_access_request:
+        exam_access_request.user_id = user_id  # Ensure user_id is not None
+        db.session.commit()
+    else:
+        flash("Request not found.", "error")
+
 @app.route('/admin/deny_access/<int:request_id>', methods=['POST'], endpoint='admin_deny_access')
 @login_required
 def deny_access(request_id):
@@ -389,6 +395,11 @@ def deny_access(request_id):
     flash(f'Access request for Exam "{access_request.exam.title}" by user "{access_request.user.username}" denied.', 'success')
     return redirect(url_for('admin_dashboard'))
 
+    if exam_access_request:
+        exam_access_request.user_id = user_id  # Ensure user_id is not None
+        db.session.commit()
+    else:
+        flash("Request not found.", "error")
 
 
 @app.route('/admin/grant_exam_access/<int:user_id>', methods=['POST'])
@@ -568,8 +579,11 @@ def delete_user(user_id):
         db.session.delete(user)
         db.session.commit()
         flash(f'User "{user.username}" has been deleted successfully.', 'success')
-
+        if user_id is None:
+            flash("User ID is missing. Cannot update the record.", "error")
+            return redirect(url_for('manage_users'))
     return redirect(url_for('manage_users'))
+   
 
 
 @app.route('/create_exam', methods=['GET', 'POST'])
@@ -939,6 +953,11 @@ def take_exam(exam_id):
 
     exam = Exam.query.get_or_404(exam_id)
     total_questions = len(exam.questions)
+
+    if exam_access:
+        exam_access.user_id = user_id  # Ensure user_id is not None
+    else:
+        flash("User not found.", "error")
 
     # Initialize session data if not already present
     if 'answers' not in session:
