@@ -934,50 +934,40 @@ def take_exam(exam_id):
         return redirect(url_for('home'))
 
     exam = Exam.query.get_or_404(exam_id)
-    question_count = exam.question_count  # Number of questions to pull
-    total_questions = min(question_count, len(exam.questions))  # Ensure you don't exceed the available questions
+    total_questions = exam.question_count
 
     # Initialize session data if not already present
-    if 'answers' not in session:
-        session['answers'] = {}
+    if 'question_sequence' not in session:
+        session['question_sequence'] = random.sample([q.id for q in exam.questions], total_questions)
     if 'current_index' not in session:
         session['current_index'] = 0
     if 'start_time' not in session:
         session['start_time'] = datetime.utcnow().isoformat()
-    if 'randomized_questions' not in session:
-        # Randomly select questions when starting the exam
-        selected_questions = random.sample(exam.questions, total_questions)
-        session['randomized_questions'] = [q.id for q in selected_questions]
 
-    # Ensure current_index is within bounds
-    current_index = session.get('current_index', 0)
-    if current_index >= total_questions:
-        current_index = total_questions - 1
-    session['current_index'] = current_index
+    question_sequence = session['question_sequence']
+    current_index = session['current_index']
 
+    # Handle form submission
     if request.method == 'POST':
         action = request.form.get('action')
-        current_question_id = str(session['randomized_questions'][session['current_index']])
+        current_question_id = str(question_sequence[current_index])
 
         if action == 'submit_answer':
             answer = request.form.get('answer')
             if answer:
                 session['answers'][current_question_id] = answer
-                session['current_index'] = min(session['current_index'] + 1, total_questions - 1)
-                flash('Answer saved', 'success')
-        elif action == 'prev_question':
-            session['current_index'] = max(session['current_index'] - 1, 0)
-        
+                if current_index + 1 < total_questions:
+                    session['current_index'] += 1
+            session.modified = True
+        elif action == 'previous_question':
+            if current_index > 0:
+                session['current_index'] -= 1
+            session.modified = True
         elif action == 'submit_exam':
-            session.modified = True  # Ensure session is saved before redirect
             return redirect(url_for('submit_exam', exam_id=exam_id))
 
-        session.modified = True
-
-    # Retrieve the current question based on the randomized question IDs
-    current_question_id = session['randomized_questions'][session['current_index']]
-    current_question = Question.query.get(current_question_id)
-
+    current_index = session['current_index']
+    current_question = Question.query.get(question_sequence[current_index])
     progress = sum(1 for answer in session['answers'].values() if answer)
     time_elapsed = (datetime.utcnow() - datetime.fromisoformat(session['start_time'])).total_seconds() / 60
 
@@ -986,11 +976,12 @@ def take_exam(exam_id):
     return render_template('take_exam.html', 
                            exam=exam,
                            current_question=current_question,
-                           current_index=session['current_index'], 
+                           current_index=current_index, 
                            progress=progress,
-                           question_count=question_count,  # Pass the correct question count
+                           total_questions=total_questions, 
                            answers=session['answers'],
                            all_questions_answered=all_questions_answered)
+
 
 
 

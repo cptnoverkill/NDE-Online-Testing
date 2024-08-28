@@ -41,10 +41,10 @@
             </div>
             
             <div class="action-buttons">
-                {% if session['current_index'] > 0 %}
-                    <button type="submit" name="action" value="prev_question" class="btn btn-secondary">Back</button>
+                <button type="submit" class="btn btn-primary" id="saveAndContinue">Save Answer and Continue</button>
+                {% if current_index > 0 %}
+                <button type="submit" class="btn btn-secondary" name="action" value="previous_question">Previous Question</button>
                 {% endif %}
-                <button type="submit" name="action" value="submit_answer" class="btn btn-primary">Save Answer and Continue</button>
             </div>
         </form>
     </div>
