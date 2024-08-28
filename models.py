@@ -21,9 +21,9 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(120), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
 
-    exam_results = db.relationship('ExamResult', back_populates='user', lazy=True, backref='user', cascade="all, delete-orphan")
-    accesses = db.relationship('ExamAccess', back_populates='user', lazy=True, backref='user', cascade="all, delete-orphan")
-    access_requests = db.relationship('ExamAccessRequest', back_populates='user', lazy=True, backref='user', cascade="all, delete-orphan")
+    exam_results = db.relationship('ExamResult', backref='user', lazy=True, cascade="all, delete-orphan")
+    accesses = db.relationship('ExamAccess', backref='user', lazy=True, cascade="all, delete-orphan")
+    access_requests = db.relationship('ExamAccessRequest', backref='user', lazy=True, cascade="all, delete-orphan")
 
 # Exam model
 class Exam(db.Model):
