@@ -552,13 +552,21 @@ def delete_user(user_id):
     if user.id == current_user.id:
         flash('You cannot delete your own account.', 'error')
     else:
-        db.session.delete(user)
-        db.session.commit()
-        flash(f'User "{user.username}" has been deleted successfully.', 'success')
-        if user_id is None:
-            flash("User ID is missing. Cannot update the record.", "error")
-            return redirect(url_for('manage_users'))
+        try:
+            # Delete related ExamResults
+            ExamResult.query.filter_by(user_id=user_id).delete()
+
+            # Add any other related deletions here if necessary
+
+            db.session.delete(user)
+            db.session.commit()
+            flash(f'User "{user.username}" has been deleted successfully.', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f"An error occurred while deleting the user: {str(e)}", "error")
+
     return redirect(url_for('manage_users'))
+
    
 
 
