@@ -963,8 +963,11 @@ def take_exam(exam_id):
             answer = request.form.get('answer')
             if answer:
                 session['answers'][current_question_id] = answer
-                session['current_index'] = (session['current_index'] + 1) % total_questions
+                session['current_index'] = min(session['current_index'] + 1, total_questions - 1)
                 flash('Answer saved', 'success')
+        elif action == 'prev_question':
+            session['current_index'] = max(session['current_index'] - 1, 0)
+        
         elif action == 'submit_exam':
             session.modified = True  # Ensure session is saved before redirect
             return redirect(url_for('submit_exam', exam_id=exam_id))
@@ -988,6 +991,7 @@ def take_exam(exam_id):
                            question_count=question_count,  # Pass the correct question count
                            answers=session['answers'],
                            all_questions_answered=all_questions_answered)
+
 
 
 
