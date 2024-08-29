@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Review Your Exam</h1>
+    
+    <form method="POST">
+        <ul>
+            {% for question in questions %}
+                <li>
+                    <p>{{ question.content }}</p>
+                    <p>Your Answer: {{ user_answers[question.id|string] or "No Answer" }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+        <button type="submit" class="btn btn-primary">Submit Exam</button>
+    </form>
+{% endblock %}

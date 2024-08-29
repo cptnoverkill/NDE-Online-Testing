@@ -60,13 +60,16 @@ def reset_session_on_navigation():
     if current_endpoint is None:
         return
     
-    
-    #if current_endpoint not in exam_endpoints and session.get('taking_exam'):
-        # Reset session only if the user is navigating away and not refreshing or reloading
-       # session.clear()  # Clear all session data if needed or be selective
-    #elif current_endpoint in exam_endpoints:
-    #    session['taking_exam'] = True
+def clear_session_before_new_exam():
+    if 'start_new_exam' in request.args:
+        session.clear()
 
+@app.route('/clear_cache')
+@login_required
+def clear_cache():
+    session.clear()  # Clear Flask session
+    flash('Cache cleared.', 'success')
+    return redirect(url_for('home'))
 
 
 @app.context_processor
@@ -178,6 +181,7 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
+    session.clear()
     logout_user()
     flash('Logged out successfully.', 'success')
     return redirect(url_for('home'))
@@ -296,9 +300,10 @@ def submit_exam(exam_id):
         exam_access.is_accessible = False
         db.session.commit()
 
+    flash(f'You scored {score:.2f}%.', 'success')
     session.clear()  # Clear all session data after submission
 
-    flash(f'You scored {score:.2f}%.', 'success')
+   
     return redirect(url_for('home'))
 
 
@@ -934,15 +939,17 @@ def take_exam(exam_id):
         return redirect(url_for('home'))
 
     exam = Exam.query.get_or_404(exam_id)
-    total_questions = exam.question_count
+    question_count = exam.question_count
 
     # Initialize session data if not already present
     if 'question_sequence' not in session:
-        session['question_sequence'] = random.sample([q.id for q in exam.questions], total_questions)
+        session['question_sequence'] = random.sample([q.id for q in exam.questions], question_count)
     if 'current_index' not in session:
         session['current_index'] = 0
     if 'start_time' not in session:
         session['start_time'] = datetime.utcnow().isoformat()
+    if 'answers' not in session:
+        session['answers'] = {}
 
     question_sequence = session['question_sequence']
     current_index = session['current_index']
@@ -956,31 +963,40 @@ def take_exam(exam_id):
             answer = request.form.get('answer')
             if answer:
                 session['answers'][current_question_id] = answer
-                if current_index + 1 < total_questions:
+                if current_index + 1 < question_count:
                     session['current_index'] += 1
-            session.modified = True
-        elif action == 'previous_question':
-            if current_index > 0:
-                session['current_index'] -= 1
+                else:
+                    return redirect(url_for('review_exam', exam_id=exam_id))
             session.modified = True
         elif action == 'submit_exam':
             return redirect(url_for('submit_exam', exam_id=exam_id))
 
-    current_index = session['current_index']
     current_question = Question.query.get(question_sequence[current_index])
     progress = sum(1 for answer in session['answers'].values() if answer)
-    time_elapsed = (datetime.utcnow() - datetime.fromisoformat(session['start_time'])).total_seconds() / 60
-
-    all_questions_answered = progress == total_questions
 
     return render_template('take_exam.html', 
                            exam=exam,
                            current_question=current_question,
                            current_index=current_index, 
                            progress=progress,
-                           total_questions=total_questions, 
-                           answers=session['answers'],
-                           all_questions_answered=all_questions_answered)
+                           question_count=question_count,
+                           answers=session['answers'])
+
+
+
+@app.route('/review_exam/<int:exam_id>', methods=['GET', 'POST'])
+@login_required
+def review_exam(exam_id):
+    exam = Exam.query.get_or_404(exam_id)
+    question_sequence = session.get('question_sequence')
+    answers = session.get('answers')
+
+    if request.method == 'POST':
+        return redirect(url_for('submit_exam', exam_id=exam_id))
+
+    questions = [Question.query.get(q_id) for q_id in question_sequence]
+
+    return render_template('review_exam.html', exam=exam, questions=questions, user_answers=user_answers)
 
 
 
@@ -1031,7 +1047,12 @@ def export_exam_result(exam_result_id):
 
 
 
-
+@app.cli.command("cleanup")
+def cleanup():
+    """Clean up orphaned data in the database."""
+    # Add your queries to delete orphaned data here
+    db.session.commit()
+    print("Cleanup completed.")
 
 
 
