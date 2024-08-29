@@ -302,25 +302,18 @@ def submit_exam(exam_id):
     exam_result.score = score
     db.session.commit()
 
-    # Store the score in the session
-    session['exam_score'] = score
-
     exam_access = ExamAccess.query.filter_by(user_id=user_id, exam_id=exam_id).first()
     if exam_access:
         exam_access.is_accessible = False
         db.session.commit()
-        
-    # Flash the score immediately
+
+    # Flash the score
     flash(f'You scored {score:.2f}%.', 'success')
+
     session.clear()  # Clear all session data after submission
 
-    return redirect(url_for('home'))
-
-
-
-   
-    return redirect(url_for('home'))
-
+    # Render a template that includes the JavaScript for the delayed redirect
+    return render_template('score_flash.html', score=score)
 
 
 

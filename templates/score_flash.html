@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Submitted</title>
+    <script>
+        // JavaScript to delay redirection
+        function redirectToHome() {
+            setTimeout(function() {
+                window.location.href = "{{ url_for('home') }}";
+            }, 3000); // Delay of 3 seconds (3000 milliseconds)
+        }
+        window.onload = redirectToHome;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Thank you for completing the exam!</h1>
+        <p>Your score: {{ score }}%</p>
+        <p>You will be redirected to the home page shortly...</p>
+    </div>
+</body>
+</html>
