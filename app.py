@@ -307,13 +307,12 @@ def submit_exam(exam_id):
         exam_access.is_accessible = False
         db.session.commit()
 
-    # Flash the score
     flash(f'You scored {score:.2f}%.', 'success')
-
     session.clear()  # Clear all session data after submission
 
-    # Render a template that includes the JavaScript for the delayed redirect
-    return render_template('score_flash.html', score=score)
+    # Pass the exam object to the template
+    return render_template('score_flash.html', score=score, exam=exam)
+
 
 
 
