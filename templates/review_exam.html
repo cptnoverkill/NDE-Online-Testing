@@ -15,11 +15,11 @@
                     {% for option in [('A', question.option_a), ('B', question.option_b), 
                                       ('C', question.option_c), ('D', question.option_d)] %}
                         {% if option[1] %}
-                            <div class="option {% if answers[question.id|string] == option[0] %}selected{% endif %}" 
-                                 data-question-id="{{ question.id }}" 
-                                 data-answer="{{ option[0] }}">
-                                {{ option[1] }} {% if answers[question.id|string] == option[0] %}(Your Answer){% endif %}
-                            </div>
+                            <label>
+                                <input type="radio" name="answer_{{ question.id }}" value="{{ option[0] }}"
+                                       {% if answers[question.id|string] == option[0] %}checked{% endif %}>
+                                {{ option[0] }}: {{ option[1] }}
+                            </label><br>
                         {% endif %}
                     {% endfor %}
                 </div>

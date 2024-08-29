@@ -108,6 +108,11 @@ admin.add_view(FileAdmin(path, '/static/', name='Static Files'))
 
 @app.route('/')
 def home():
+    # Flash the exam score if present in session
+    if 'exam_score' in session:
+        flash(f'You scored {session["exam_score"]:.2f}%.', 'success')
+        session.pop('exam_score', None)
+        
     if current_user.is_authenticated:
         if current_user.is_admin:
             accessible_exams = Exam.query.all()  # Admins see all Exams
@@ -297,15 +302,18 @@ def submit_exam(exam_id):
     exam_result.score = score
     db.session.commit()
 
+    # Store the score in the session
+    session['exam_score'] = score
+
     exam_access = ExamAccess.query.filter_by(user_id=user_id, exam_id=exam_id).first()
     if exam_access:
         exam_access.is_accessible = False
         db.session.commit()
 
-    flash(f'You scored {score:.2f}%.', 'success')
     session.clear()  # Clear all session data after submission
 
     return redirect(url_for('home'))
+
 
 
    
@@ -960,8 +968,7 @@ def review_exam(exam_id):
         # When the form is submitted, redirect to submit_exam
         return redirect(url_for('submit_exam', exam_id=exam_id))
 
-    # Instead of relying on `question_sequence`, directly fetch the questions from the database
-    questions = exam.questions.all()  # Fetch questions directly related to the exam
+    questions = exam.questions  # No need to call .all() since questions is already a list
 
     return render_template('review_exam.html', exam=exam, questions=questions, answers=answers)
 
