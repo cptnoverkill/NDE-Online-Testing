@@ -15,21 +15,37 @@
                     {% for option in [('A', question.option_a), ('B', question.option_b), 
                                       ('C', question.option_c), ('D', question.option_d)] %}
                         {% if option[1] %}
-                            <label>
-                                <input type="radio" name="answer_{{ question.id }}" value="{{ option[0] }}"
-                                       {% if answers[question.id|string] == option[0] %}checked{% endif %}>
-                                {{ option[0] }}: {{ option[1] }}
-                            </label><br>
+                            <div class="option {% if answers[question.id|string] == option[0] %}selected{% endif %}" 
+                                 data-question-id="{{ question.id }}" 
+                                 data-answer="{{ option[0] }}">
+                                {{ option[1] }} {% if answers[question.id|string] == option[0] %}(Your Answer){% endif %}
+                            </div>
                         {% endif %}
                     {% endfor %}
                 </div>
+                {% if answers[question.id|string] is none %}
+                    <div class="unanswered-warning">You have not answered this question.</div>
+                {% endif %}
             </div>
         {% endfor %}
         <div class="action-buttons">
-            <button type="submit" class="btn btn-primary">Submit Answers</button>
+            <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Submit Answers</button>
         </div>
     </form>
 </div>
+
+<script>
+    window.onload = function() {
+        const unansweredWarnings = document.querySelectorAll('.unanswered-warning');
+        const submitButton = document.getElementById('submitBtn');
+
+        if (unansweredWarnings.length === 0) {
+            submitButton.disabled = false;
+        } else {
+            alert("Please answer all the questions before submitting the exam.");
+        }
+    }
+</script>
 
 <style>
     .exam-container {
@@ -60,6 +76,10 @@
         background-color: #4CAF50;
         color: white;
         border-color: #45a049;
+    }
+    .unanswered-warning {
+        color: red;
+        margin-top: 10px;
     }
 </style>
 

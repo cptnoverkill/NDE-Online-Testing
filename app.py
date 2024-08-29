@@ -262,10 +262,14 @@ def submit_exam(exam_id):
     exam = Exam.query.get_or_404(exam_id)
     user_id = current_user.id
 
-    total_questions = len(exam.questions)
-    correct_answers = 0
-
     answers = session.get('answers', {})
+
+    if len(answers) < len(exam.questions):
+        flash("Please answer all the questions before submitting the exam.", "error")
+        return redirect(url_for('review_exam', exam_id=exam_id))
+
+    # (rest of your submission logic...)
+
 
     if not answers:
         flash("There was an issue with your session data. Please try again.", "error")
