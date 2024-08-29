@@ -954,14 +954,14 @@ def take_exam(exam_id):
 @login_required
 def review_exam(exam_id):
     exam = Exam.query.get_or_404(exam_id)
-    question_sequence = session.get('question_sequence', [])
     answers = session.get('answers', {})
 
     if request.method == 'POST':
         # When the form is submitted, redirect to submit_exam
         return redirect(url_for('submit_exam', exam_id=exam_id))
 
-    questions = [Question.query.get(q_id) for q_id in question_sequence]
+    # Instead of relying on `question_sequence`, directly fetch the questions from the database
+    questions = exam.questions.all()  # Fetch questions directly related to the exam
 
     return render_template('review_exam.html', exam=exam, questions=questions, answers=answers)
 
