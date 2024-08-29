@@ -22,9 +22,9 @@
 
     <form method="POST">
         {% for question in questions %}
-        <div class="question-card" id="question_{{ question.id }}">
-            <div class="question-text">{{ question.content }}</div>
-            <div class="options">
+        <div class="question-card" id="question_{{ question.id }}" style="font-size: x-large;">
+            <div class="question-text" style="color: rgb(191, 208, 255);"> {{ question.content }} </div>
+            <div class="options" style="font-size: large;">
                 {% for option in [('A', question.option_a), ('B', question.option_b),
                 ('C', question.option_c), ('D', question.option_d)] %}
                 {% if option[1] %}
