@@ -112,7 +112,7 @@ def home():
     if 'exam_score' in session:
         flash(f'You scored {session["exam_score"]:.2f}%.', 'success')
         session.pop('exam_score', None)
-        
+
     if current_user.is_authenticated:
         if current_user.is_admin:
             accessible_exams = Exam.query.all()  # Admins see all Exams
@@ -309,7 +309,9 @@ def submit_exam(exam_id):
     if exam_access:
         exam_access.is_accessible = False
         db.session.commit()
-
+        
+    # Flash the score immediately
+    flash(f'You scored {score:.2f}%.', 'success')
     session.clear()  # Clear all session data after submission
 
     return redirect(url_for('home'))
