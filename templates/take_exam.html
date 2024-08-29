@@ -45,17 +45,17 @@
 </div>
 
 <script>
-    console.log("JavaScript loaded"); // To check if the script is loaded
+    
     function selectOption(optionDiv, questionId) {
         const options = document.querySelectorAll(`#question_${questionId} .option`);
         options.forEach(opt => opt.classList.remove('selected'));  // Deselect all options
         optionDiv.classList.add('selected');  // Select the clicked option
-        alert("Option selected for question: " + questionId);
+        
     }
 
     function confirmAnswer(questionId) {
         const selectedOption = document.querySelector(`#question_${questionId} .option.selected`);
-        alert("Confirm button clicked for question: " + questionId);
+        
 
         if (selectedOption) {
             const answerValue = selectedOption.getAttribute('data-value');
@@ -67,7 +67,7 @@
             document.querySelector('form').appendChild(hiddenInput);  // Add the selected answer to the form
             document.getElementById(`question_${questionId}`).style.display = 'none';  // Hide the question after confirming the answer
         } else {
-            alert('Please select an answer before confirming.');
+            
         }
     }
 </script>

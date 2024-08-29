@@ -6,7 +6,7 @@
 <div class="exam-container">
     <h1 class="exam-title">Review Your Answers for {{ exam.title }}</h1>
 
-    <form method="POST" id="reviewForm">
+    <form method="POST" id="reviewForm" action="{{ url_for('submit_exam', exam_id=exam.id) }}">
         {% for question in questions %}
             <div class="question-card">
                 <div class="question-number">Question {{ loop.index }}</div>
