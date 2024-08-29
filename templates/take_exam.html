@@ -1,164 +1,74 @@
 {% extends "base.html" %}
 {% block title %} {{ exam.title }} {% endblock %}
 {% block content %}
-<div class="exam-container">
-    <h1 class="exam-title">{{ exam.title }}</h1>
-
-    <!-- Debug Information
-    <div style="background-color: #ffcccc; padding: 10px; margin-bottom: 20px;">
-        <h3>Debug Info:</h3>
-        <p>Progress: {{ progress }} / {{ total_questions }}</p>
-        <p>All Questions Answered: {{ all_questions_answered }}</p>
-        <p>Current Index: {{ current_index }}</p>
-        <p>Answers: {{ answers }}</p>
-    </div> -->
-    
-    <div class="progress-container">
-        <div class="progress-bar">
-            <div class="progress" style="width: {{ (progress / question_count) * 100 }}%;"></div>
-        </div>
-        {% if not all_questions_answered %}
-        <div class="progress-text">Question {{ current_index + 1 }} of {{ question_count }}</div>
-        {% endif %}
-    </div>
-
-    {% if not all_questions_answered %}
-    <div class="question-card">
-        <div class="question-number">Question {{ current_index + 1 }}</div>
-        <div class="question-text">{{ current_question.content }}</div>
-        <form method="POST" id="answerForm">
-            <input type="hidden" name="action" value="submit_answer">
-            <input type="hidden" name="answer" id="selectedAnswer">
-            <div class="options">
-                {% for option in [('A', current_question.option_a), ('B', current_question.option_b), 
-                                  ('C', current_question.option_c), ('D', current_question.option_d)] %}
-                    {% if option[1] %}
-                        <div class="option {% if answers[current_question.id|string] == option[0] %}selected{% endif %}" data-value="{{ option[0] }}">
-                            {{ option[1] }}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-            
-            <div class="action-buttons">
-                <button type="submit" class="btn btn-primary" id="saveAndContinue">Save Answer and Continue</button>
-            </div>
-        </form>
-    </div>
-    {% endif %}
-    
-    {% if all_questions_answered %}
-    <div class="submit-section">
-        <h3>All questions answered!</h3>
-        <form method="POST" action="{{ url_for('submit_exam', exam_id=exam.id) }}">
-            <input type="hidden" name="action" value="submit_exam">
-            <button type="submit" class="btn btn-success">Submit Exam</button>
-        </form>
-    </div>
-    {% endif %}
-    
-    <div class="info-card">
-        <div class="info-title">Exam Information</div>
-        <div class="info-item">Questions Answered: {{ progress }} / {{ question_count }}</div>
-    </div>
-</div>
 
 <style>
-    /* Your existing styles here */
-    .exam-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    .progress-bar {
-        background-color: #e0e0e0;
-        height: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
-    .progress {
-        background-color: #4CAF50;
-        height: 100%;
-        border-radius: 10px;
-    }
-    .question-card {
-        background-color: #2b2a2a;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-    .options {
-        display: grid;
-        gap: 10px;
-        margin-top: 15px;
-    }
     .option {
-        background-color: #474747;
-        border: 2px solid #ccc;
-        border-radius: 5px;
         padding: 10px;
+        border: 1px solid #ccc;
         cursor: pointer;
-        transition: all 0.3s ease;
+        margin-bottom: 5px;
     }
-    .option:hover {
-        background-color: #d0d0d0;
-        color:#2b2a2a;
-    }
+
     .option.selected {
         background-color: #4CAF50;
         color: white;
-        border-color: #45a049;
-    }
-    .action-buttons {
-        margin-top: 20px;
-        display: flex;
-        justify-content: space-between;
-    }
-    .btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-    .btn-primary {
-        background-color: #4CAF50;
-        color: white;
-    }
-    .btn-secondary {
-        background-color: #f44336;
-        color: white;
-    }
-    .info-card {
-        background-color: #474747;
-        border-radius: 8px;
-        padding: 15px;
-        margin-top: 20px;
     }
 </style>
 
-<script>       
-document.addEventListener('DOMContentLoaded', function() {
-    const options = document.querySelectorAll('.option');
-    const selectedAnswerInput = document.getElementById('selectedAnswer');
-    const answerForm = document.getElementById('answerForm');
 
-    options.forEach(option => {
-        option.addEventListener('click', function() {
-            options.forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-            selectedAnswerInput.value = this.getAttribute('data-value');
-        });
-    });
+<div class="exam-container">
+    <h1 class="exam-title">{{ exam.title }}</h1>
 
-    answerForm.addEventListener('submit', function(event) {
-        if (!selectedAnswerInput.value) {
-            event.preventDefault();
-            alert('Please select an answer before continuing.');
+    <form method="POST">
+        {% for question in questions %}
+        <div class="question-card" id="question_{{ question.id }}">
+            <div class="question-text">{{ question.content }}</div>
+            <div class="options">
+                {% for option in [('A', question.option_a), ('B', question.option_b),
+                ('C', question.option_c), ('D', question.option_d)] %}
+                {% if option[1] %}
+                <div class="option" data-value="{{ option[0] }}" onclick="selectOption(this, {{ question.id }})">
+                    {{ option[0] }}: {{ option[1] }}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <button type="button" class="btn btn-primary" style="display: inline-block; margin-top: 10px;"
+                onclick="confirmAnswer({{ question.id }})">Confirm Answer</button>
+        </div>
+        {% endfor %}
+        <div class="action-buttons">
+            <button type="submit" class="btn btn-success">Review and Submit</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    console.log("JavaScript loaded"); // To check if the script is loaded
+    function selectOption(optionDiv, questionId) {
+        const options = document.querySelectorAll(`#question_${questionId} .option`);
+        options.forEach(opt => opt.classList.remove('selected'));  // Deselect all options
+        optionDiv.classList.add('selected');  // Select the clicked option
+        alert("Option selected for question: " + questionId);
+    }
+
+    function confirmAnswer(questionId) {
+        const selectedOption = document.querySelector(`#question_${questionId} .option.selected`);
+        alert("Confirm button clicked for question: " + questionId);
+
+        if (selectedOption) {
+            const answerValue = selectedOption.getAttribute('data-value');
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = `answer_${questionId}`;
+            hiddenInput.value = answerValue;
+
+            document.querySelector('form').appendChild(hiddenInput);  // Add the selected answer to the form
+            document.getElementById(`question_${questionId}`).style.display = 'none';  // Hide the question after confirming the answer
         } else {
-            console.log("Form Submitted with Answer: " + selectedAnswerInput.value);
+            alert('Please select an answer before confirming.');
         }
-    });
-});
+    }
 </script>
-
 {% endblock %}

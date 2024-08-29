@@ -260,7 +260,9 @@ def submit_exam(exam_id):
     total_questions = len(exam.questions)
     correct_answers = 0
 
-    if 'answers' not in session:
+    answers = session.get('answers', {})
+
+    if not answers:
         flash("There was an issue with your session data. Please try again.", "error")
         return redirect(url_for('take_exam', exam_id=exam_id))
 
@@ -270,7 +272,7 @@ def submit_exam(exam_id):
 
     for question in exam.questions:
         question_id_str = str(question.id)
-        user_answer = session['answers'].get(question_id_str)
+        user_answer = answers.get(question_id_str)
 
         if user_answer is not None:
             if question.correct_answer in ['A', 'B', 'C', 'D']:
@@ -302,6 +304,9 @@ def submit_exam(exam_id):
 
     flash(f'You scored {score:.2f}%.', 'success')
     session.clear()  # Clear all session data after submission
+
+    return redirect(url_for('home'))
+
 
    
     return redirect(url_for('home'))
@@ -455,23 +460,6 @@ def manage_questions(exam_id):
 
     return render_template('manage_questions.html', exam=exam, questions=questions)
 
-
-@app.route('/admin/deny_access/<int:request_id>', methods=['POST'])
-@login_required
-def deny_access(request_id):
-    if not current_user.is_admin:
-        flash('You do not have permission to perform this action.', 'error')
-        return redirect(url_for('home'))
-    
-    access_request = ExamAccessRequest.query.get_or_404(request_id)
-    access_request.status = 'denied'
-    access_request.response_date = datetime.utcnow()
-    access_request.admin_comment = request.form.get('admin_comment', '')
-    db.session.commit()
-
-    
-    flash('Access request denied.', 'success')
-    return redirect(url_for('admin_access_requests'))
 
 @app.route('/dashboard')
 @login_required
@@ -939,48 +927,26 @@ def take_exam(exam_id):
         return redirect(url_for('home'))
 
     exam = Exam.query.get_or_404(exam_id)
-    question_count = exam.question_count
 
-    # Initialize session data if not already present
-    if 'question_sequence' not in session:
-        session['question_sequence'] = random.sample([q.id for q in exam.questions], question_count)
-    if 'current_index' not in session:
-        session['current_index'] = 0
-    if 'start_time' not in session:
-        session['start_time'] = datetime.utcnow().isoformat()
     if 'answers' not in session:
         session['answers'] = {}
 
-    question_sequence = session['question_sequence']
-    current_index = session['current_index']
-
-    # Handle form submission
     if request.method == 'POST':
-        action = request.form.get('action')
-        current_question_id = str(question_sequence[current_index])
-
-        if action == 'submit_answer':
-            answer = request.form.get('answer')
+        for question in exam.questions:
+            answer = request.form.get(f'answer_{question.id}')
             if answer:
-                session['answers'][current_question_id] = answer
-                if current_index + 1 < question_count:
-                    session['current_index'] += 1
-                else:
-                    return redirect(url_for('review_exam', exam_id=exam_id))
-            session.modified = True
-        elif action == 'submit_exam':
-            return redirect(url_for('submit_exam', exam_id=exam_id))
+                session['answers'][str(question.id)] = answer
+        
+        session.modified = True
+        return redirect(url_for('review_exam', exam_id=exam_id))
 
-    current_question = Question.query.get(question_sequence[current_index])
-    progress = sum(1 for answer in session['answers'].values() if answer)
+    questions = exam.questions
 
     return render_template('take_exam.html', 
                            exam=exam,
-                           current_question=current_question,
-                           current_index=current_index, 
-                           progress=progress,
-                           question_count=question_count,
+                           questions=questions,
                            answers=session['answers'])
+
 
 
 
@@ -988,15 +954,16 @@ def take_exam(exam_id):
 @login_required
 def review_exam(exam_id):
     exam = Exam.query.get_or_404(exam_id)
-    question_sequence = session.get('question_sequence')
-    answers = session.get('answers')
+    question_sequence = session.get('question_sequence', [])
+    answers = session.get('answers', {})
 
     if request.method == 'POST':
+        # When the form is submitted, redirect to submit_exam
         return redirect(url_for('submit_exam', exam_id=exam_id))
 
     questions = [Question.query.get(q_id) for q_id in question_sequence]
 
-    return render_template('review_exam.html', exam=exam, questions=questions, user_answers=user_answers)
+    return render_template('review_exam.html', exam=exam, questions=questions, answers=answers)
 
 
 

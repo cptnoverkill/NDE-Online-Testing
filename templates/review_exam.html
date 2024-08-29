@@ -1,17 +1,66 @@
 {% extends "base.html" %}
 
+{% block title %}Review Your Answers{% endblock %}
+
 {% block content %}
-    <h1>Review Your Exam</h1>
-    
-    <form method="POST">
-        <ul>
-            {% for question in questions %}
-                <li>
-                    <p>{{ question.content }}</p>
-                    <p>Your Answer: {{ user_answers[question.id|string] or "No Answer" }}</p>
-                </li>
-            {% endfor %}
-        </ul>
-        <button type="submit" class="btn btn-primary">Submit Exam</button>
+<div class="exam-container">
+    <h1 class="exam-title">Review Your Answers for {{ exam.title }}</h1>
+
+    <form method="POST" id="reviewForm">
+        {% for question in questions %}
+            <div class="question-card">
+                <div class="question-number">Question {{ loop.index }}</div>
+                <div class="question-text">{{ question.content }}</div>
+                <div class="options">
+                    {% for option in [('A', question.option_a), ('B', question.option_b), 
+                                      ('C', question.option_c), ('D', question.option_d)] %}
+                        {% if option[1] %}
+                            <div class="option {% if answers[question.id|string] == option[0] %}selected{% endif %}" 
+                                 data-question-id="{{ question.id }}" 
+                                 data-answer="{{ option[0] }}">
+                                {{ option[1] }} {% if answers[question.id|string] == option[0] %}(Your Answer){% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        <div class="action-buttons">
+            <button type="submit" class="btn btn-primary">Submit Answers</button>
+        </div>
     </form>
+</div>
+
+<style>
+    .exam-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .question-card {
+        background-color: #2b2a2a;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .options {
+        display: grid;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .option {
+        background-color: #474747;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .option.selected {
+        background-color: #4CAF50;
+        color: white;
+        border-color: #45a049;
+    }
+</style>
+
 {% endblock %}
