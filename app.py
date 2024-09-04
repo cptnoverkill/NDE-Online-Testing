@@ -262,39 +262,43 @@ def submit_exam(exam_id):
     exam = Exam.query.get_or_404(exam_id)
     user_id = current_user.id
 
+    total_questions = len(exam.questions)  # Get the total number of questions
+    correct_answers = 0  # To count correct answers
+
+    # Get the answers from the session
     answers = session.get('answers', {})
 
-    if len(answers) < len(exam.questions):
+    # Ensure all questions have been answered
+    if len(answers) < total_questions:
         flash("Please answer all the questions before submitting the exam.", "error")
         return redirect(url_for('review_exam', exam_id=exam_id))
 
-    # (rest of your submission logic...)
-
-
-    if not answers:
-        flash("There was an issue with your session data. Please try again.", "error")
-        return redirect(url_for('take_exam', exam_id=exam_id))
-
+    # Create a new exam result entry in the database
     exam_result = ExamResult(user_id=user_id, exam_id=exam_id, score=0)
     db.session.add(exam_result)
     db.session.commit()
 
+    # Evaluate the answers and compute the score
     for question in exam.questions:
         question_id_str = str(question.id)
         user_answer = answers.get(question_id_str)
 
-        if user_answer is not None:
+        if user_answer:
+            # Get the correct answer for the current question
             if question.correct_answer in ['A', 'B', 'C', 'D']:
                 correct_answer_content = getattr(question, f"option_{question.correct_answer.lower()}")
             else:
                 correct_answer_content = question.correct_answer
 
+            # Normalize both the correct answer and user answer for comparison
             correct_answer_content = correct_answer_content.strip().lower()
             user_answer_content = getattr(question, f"option_{user_answer.lower()}", user_answer).strip().lower()
 
+            # Compare the user's answer with the correct answer
             if user_answer_content == correct_answer_content:
                 correct_answers += 1
             else:
+                # Record missed question if incorrect
                 missed_question = MissedQuestion(
                     exam_result_id=exam_result.id,
                     question_id=question.id,
@@ -302,23 +306,22 @@ def submit_exam(exam_id):
                 )
                 db.session.add(missed_question)
 
+    # Calculate the score
     score = (correct_answers / total_questions) * 100
     exam_result.score = score
     db.session.commit()
 
+    # Update exam access to make it inaccessible after submission
     exam_access = ExamAccess.query.filter_by(user_id=user_id, exam_id=exam_id).first()
     if exam_access:
         exam_access.is_accessible = False
         db.session.commit()
 
-    flash(f'You scored {score:.2f}%.', 'success')
-    session.clear()  # Clear all session data after submission
+    # Clear session data and store the score in session to be flashed on the home page
+    session.clear()
+    session['exam_score'] = score
 
-    # Pass the exam object to the template
-    return render_template('score_flash.html', score=score, exam=exam)
-
-
-
+    return redirect(url_for('home'))
 
 
 

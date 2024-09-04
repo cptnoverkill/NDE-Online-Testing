@@ -8,7 +8,7 @@
 
     <form method="POST" id="reviewForm" action="{{ url_for('submit_exam', exam_id=exam.id) }}">
         {% for question in questions %}
-            <div class="question-card">
+            <div class="question-card" id="question-{{ question.id }}">
                 <div class="question-number">Question {{ loop.index }}</div>
                 <div class="question-text">{{ question.content }}</div>
                 <div class="options">
@@ -24,7 +24,9 @@
                     {% endfor %}
                 </div>
                 {% if answers[question.id|string] is none %}
-                    <div class="unanswered-warning">You have not answered this question.</div>
+                    <div class="unanswered-warning" id="warning-{{ question.id }}">You have not answered this question.</div>
+                {% else %}
+                    <div class="unanswered-warning" style="display:none;" id="warning-{{ question.id }}"></div>
                 {% endif %}
             </div>
         {% endfor %}
@@ -39,7 +41,16 @@
         const unansweredWarnings = document.querySelectorAll('.unanswered-warning');
         const submitButton = document.getElementById('submitBtn');
 
-        if (unansweredWarnings.length === 0) {
+        // Check if there are any unanswered warnings visible
+        let unanswered = false;
+        unansweredWarnings.forEach(function(warning) {
+            if (warning.style.display !== 'none') {
+                unanswered = true;
+            }
+        });
+
+        // Enable or disable the submit button based on unanswered questions
+        if (!unanswered) {
             submitButton.disabled = false;
         } else {
             alert("Please answer all the questions before submitting the exam.");
