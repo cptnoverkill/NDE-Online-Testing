@@ -310,6 +310,7 @@ def submit_exam(exam_id):
     score = (correct_answers / total_questions) * 100
     exam_result.score = score
     db.session.commit()
+    flash('Test Submitted', 'success')
 
     # Update exam access to make it inaccessible after submission
     exam_access = ExamAccess.query.filter_by(user_id=user_id, exam_id=exam_id).first()
